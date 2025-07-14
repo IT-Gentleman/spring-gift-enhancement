@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원정보 작성</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        a, button {
+             padding: 3px 6px;
+             border-radius: 4px;
+             text-decoration: none;
+             margin-right: 5px;
+             font-size: 14px;
+         }
+        button {
+            cursor: pointer;
+        }
+        a {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>회원정보 작성</h1>
+    <h2 th:if="${memberId == null}">- 신규 회원</h2>
+    <form th:action="${memberId == null} ? @{/admin/members} : @{/admin/members/{id}(id=${memberId})}"
+          method="post"
+          th:object="${member}">
+        <input type="hidden" name="_method" value="put" th:if="${memberId != null}" />
+        <p th:if="${memberId != null}">
+            <label>id:</label>
+            <input type="text" th:field="*{identifyNumber}" readonly="readonly" />
+        </p>
+        <p>
+            <label>email:</label>
+            <input type="text" th:field="*{email}" />
+        </p>
+        <p>
+            <label>password:</label>
+            <input type="password" th:field="*{password}" th:placeholder="${memberId != null} ? '비밀번호 미변경 시 빈칸 유지' : ''" />
+        </p>
+        <p>
+            <label>role:</label>
+            <select th:field="*{authority}">
+                <option th:each="role : ${T(gift.entity.Role).values()}"
+                        th:value="${role}"
+                        th:text="${role}">
+                </option>
+            </select>
+        </p>
+        <button type="submit" th:if="${memberId == null}" >Create</button>
+        <button type="submit" th:if="${memberId != null}" >Apply Changes</button>
+    </form>
+    <form th:if="${memberId != null}"
+          th:action="@{/admin/members/{id}(id=${memberId})}"
+          method="post" style="display:inline"
+          onsubmit="return confirm('Are you sure to delete?');">
+        <input type="hidden" name="_method" value="delete" />
+        <button type="submit">Delete</button>
+    </form>
+    <form action="/admin/members"
+          method="get" style="display:inline">
+        <button type="submit">Go to Member List</button>
+    </form>
+    <script th:if="${message}" th:inline="javascript">
+        /*<![CDATA[*/
+        alert([[${message}]]);
+        /*]]>*/
+    </script>
+</body>
+</html>
