@@ -56,8 +56,8 @@ class MemberControllerTest {
         }
 
         @Test
-        @DisplayName("POST /api/members/register - 이메일 중복 시 400 BAD_REQUEST")
-        void 이메일_중복_시_400_BAD_REQUEST() {
+        @DisplayName("POST /api/members/register - 이메일 중복 시 409 CONFLICT")
+        void 이메일_중복_시_409_CONFLICT() {
             RegisterMemberRequest request = new RegisterMemberRequest("existing@example.com", "password123456789");
 
             // 먼저 회원가입을 수행
@@ -74,7 +74,7 @@ class MemberControllerTest {
                             .body(request)
                             .retrieve()
                             .toBodilessEntity())
-                    .satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
+                    .satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
         }
 
         @Test

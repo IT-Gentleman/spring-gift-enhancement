@@ -1,5 +1,6 @@
 package gift.service;
 
+import gift.dto.UpdateMemberResult;
 import gift.entity.Member;
 import gift.entity.Role;
 import gift.exception.InvalidCredentialsException;
@@ -25,6 +26,8 @@ public class MemberService {
     }
 
     public Member createMember(String email, String rawPassword) {
+        checkValidMemberUpdate(email, null);
+
         String encodedPassword = BCryptEncryptor.encrypt(rawPassword);
         Member member = new Member(email, encodedPassword);
         Optional<Long> optionalIdentifyNumber = memberRepository.createMember(member);
@@ -51,13 +54,17 @@ public class MemberService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found"));
     }
 
-    public Member updateSelectivelyMember(Long id, String email, String password, Role authority) {
+    public UpdateMemberResult updateSelectivelyMember(Long id, String email, Boolean resetPassword, Role authority) {
         Member member = getMemberById(id);
-        if (!password.isEmpty()) {
-            password = BCryptEncryptor.encrypt(password);
+        checkValidMemberUpdate(email, member.getIdentifyNumber());
+        String rawPassword = null;
+        String encodedPassword = null;
+        if (resetPassword) {
+            rawPassword = generateRandomPassword(10);
+            encodedPassword = BCryptEncryptor.encrypt(rawPassword);
         }
-        throwNotFoundIfTrue(!memberRepository.updateMember(member.applyPatch(email, password, authority)));
-        return member;
+        throwNotFoundIfTrue(!memberRepository.updateMember(member.applyPatch(email, encodedPassword, authority)));
+        return new UpdateMemberResult(member, Optional.ofNullable(rawPassword));
     }
 
     public void deleteMember(Long id) {
@@ -80,5 +87,27 @@ public class MemberService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
         return optionalMember.get();
+    }
+
+    private void checkValidMemberUpdate(String email, Long memberId) {
+        if (!isEmailUsable(email, memberId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
+        }
+    }
+
+    private boolean isEmailUsable(String email, Long memberId) {
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        // 해당 이메일을 사용중인 멤버가 없거나, 이를 요청한 회원이 해당 이메일의 소유자일 경우 (즉, 이메일 변경이 아님)
+        return optionalMember.isEmpty() || optionalMember.get().getIdentifyNumber().equals(memberId);
+    }
+
+    private String generateRandomPassword(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        StringBuilder sb = new StringBuilder();
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        for (int i = 0; i < length; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 }
