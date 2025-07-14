@@ -1,6 +1,7 @@
 package gift.controller;
 
 import gift.dto.AddWishItemRequest;
+import gift.dto.AuthenticatedMember;
 import gift.dto.WishItemResponse;
 import gift.entity.Member;
 import gift.service.WishService;
@@ -24,36 +25,36 @@ public class WishController {
 
     @GetMapping
     public ResponseEntity<List<WishItemResponse>> getWishList(
-        @LoginMember Member member
+        @LoginMember AuthenticatedMember member
     ) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(
-                wishService.getWishListByMemberId(member.getIdentifyNumber())
+                wishService.getWishListByMemberId(member.id())
                     .stream().map(wishItem -> WishItemResponse.from(wishItem)).toList()
             );
     }
 
     @PostMapping
     public ResponseEntity<WishItemResponse> addWishItem(
-        @LoginMember Member member,
+        @LoginMember AuthenticatedMember member,
         @RequestBody @Valid AddWishItemRequest request
     ) {
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(
                 WishItemResponse.from(
-                        wishService.addWishItem(member.getIdentifyNumber(), request.productId())
+                        wishService.addWishItem(member.id(), request.productId())
                 )
             );
     }
 
     @DeleteMapping("/{wishItemId}")
     public ResponseEntity<Void> deleteWishItem(
-        @LoginMember Member member,
+        @LoginMember AuthenticatedMember member,
         @PathVariable Long wishItemId
     ) {
-        wishService.removeWishItemByWishId(member.getIdentifyNumber(), wishItemId);
+        wishService.removeWishItemByWishId(member.id(), wishItemId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

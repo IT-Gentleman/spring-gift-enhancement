@@ -42,13 +42,6 @@ public class MemberRepository {
             .list();
     }
 
-    public Boolean checkEmailExists(String email) {
-        return jdbcClient.sql("select count(*) from member where email = :email")
-            .param("email", email)
-            .query(Long.class)
-            .single() == 1;
-    }
-
     public Optional<Member> findByEmail(String email) {
         return jdbcClient.sql("select * from member where email = :email")
             .param("email", email)

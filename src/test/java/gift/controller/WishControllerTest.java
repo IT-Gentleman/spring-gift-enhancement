@@ -1,6 +1,7 @@
 package gift.controller;
 
 import gift.dto.AddWishItemRequest;
+import gift.dto.AuthenticatedMember;
 import gift.dto.WishItemResponse;
 import gift.entity.Member;
 import gift.entity.Role;
@@ -54,7 +55,7 @@ class WishControllerTest {
         Member user = new Member(0L, "user@examle.com", "userpassword123456789", Role.ROLE_USER);
         userToken = jwtTokenProvider.createToken(user);
 
-        when(memberService.getMemberFromToken(userToken)).thenReturn(user);
+        when(memberService.getAuthenticationFromToken(userToken)).thenReturn(AuthenticatedMember.from(user));
     }
 
     @Nested

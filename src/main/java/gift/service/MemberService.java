@@ -1,5 +1,6 @@
 package gift.service;
 
+import gift.dto.AuthenticatedMember;
 import gift.dto.UpdateMemberResult;
 import gift.entity.Member;
 import gift.entity.Role;
@@ -71,13 +72,7 @@ public class MemberService {
         throwNotFoundIfTrue(!memberRepository.deleteMember(id));
     }
 
-    private void throwNotFoundIfTrue(boolean condition) {
-        if (condition) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    public Member getMemberFromToken(String token) {
+    public AuthenticatedMember getAuthenticationFromToken(String token) {
         if (token == null || !jwtTokenProvider.validateToken(token)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
@@ -86,7 +81,7 @@ public class MemberService {
         if (optionalMember.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
-        return optionalMember.get();
+        return AuthenticatedMember.from(optionalMember.get());
     }
 
     private void checkValidMemberUpdate(String email, Long memberId) {
@@ -109,5 +104,11 @@ public class MemberService {
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }
         return sb.toString();
+    }
+
+    private void throwNotFoundIfTrue(boolean condition) {
+        if (condition) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 }
