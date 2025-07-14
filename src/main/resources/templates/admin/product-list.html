@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상품목록</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        a, button {
+            padding: 3px 6px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        button {
+            cursor: pointer;
+        }
+        a {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h2>상품목록</h2>
+    <a th:if="${validated}"
+       th:href="@{/admin/products(validated=false)}"
+       style="background-color:black; color:white; border:1px solid black;">
+        Go to Non-Validated Product List
+    </a>
+    <a th:if="${!validated}"
+       th:href="@{/admin/products(validated=true)}"
+       style="background-color:black; color:white; border:1px solid black;">
+        Go to Validated Product List
+    </a>
+    <a href="/admin/products/new"
+       style="background-color:green; color:white; border:1px solid green;">
+        Create New Product
+    </a>
+    <table>
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>image</th>
+                <th>name</th>
+                <th>price</th>
+                <th>View/Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="product: ${products}">
+                <td th:text="${product.id}" />
+                <td>
+                    <img th:src="${product.imageUrl}" width="50" />
+                </td>
+                <td th:text="${product.name}" />
+                <td th:text="${product.price}" />
+                <td>
+                    <form th:action="@{/admin/products/{id}(id=${product.id})}"
+                          method="get" style="display:inline">
+                        <button type="submit">View/Edit</button>
+                    </form>
+                </td>
+                <td>
+                    <form th:action="@{/admin/products/{id}(id=${product.id})}"
+                          method="post" style="display:inline"
+                          onsubmit="return confirm('Are you sure to delete?');">
+                        <input type="hidden" name="_method" value="delete" />
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <script th:if="${message}" th:inline="javascript">
+        /*<![CDATA[*/
+        alert([[${message}]]);
+        /*]]>*/
+    </script>
+</body>
+</html>
