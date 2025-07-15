@@ -39,7 +39,9 @@
         </p>
         <p>
             <label>password:</label>
-            <input type="password" th:field="*{password}" th:placeholder="${memberId != null} ? '비밀번호 미변경 시 빈칸 유지' : ''" />
+            <input type="password" th:field="*{password}" th:if="${memberId == null}" placeholder="비밀번호는 15자 이상 64자 이내로 작성하십시오" />
+            <input type="checkbox" th:field="*{resetPassword}" th:if="${memberId != null}" />
+            <span th:if="${memberId != null}">비밀번호 초기화 요청 (초기화된 비밀번호는 팝업으로 제공됩니다)</span>
         </p>
         <p>
             <label>role:</label>

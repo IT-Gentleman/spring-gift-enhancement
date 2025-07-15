@@ -9,3 +9,9 @@
 - `@LoginMember` 반환타입을 Dto로 변경
   - 현행 `Member` 엔티티를 직접 반환하는것 대신, `AuthenticatedMember` Dto로 반환
   - 불필요한 Member 엔티티 정보 노출 방지 기대
+### Step1 implementation
+- JPA 엔티티 매핑
+  - Repository 레이어의 추상화 및 메소드명 변경
+  - Repository 레이어의 메소드명 변경에 따른 Service 레이어의 호출부 수정
+  - Entity 클래스의 어노테이션 추가 및 update 메소드의 setter로의 변환 (불변객체 미반환화)
+  - 테스트코드 작성

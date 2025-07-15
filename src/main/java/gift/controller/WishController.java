@@ -1,8 +1,10 @@
 package gift.controller;
 
 import gift.dto.AddWishItemRequest;
+import gift.dto.AuthenticatedMember;
 import gift.dto.WishItemResponse;
 import gift.entity.Member;
+import gift.entity.WishItem;
 import gift.service.WishService;
 import gift.validator.LoginMember;
 import jakarta.validation.Valid;
@@ -24,36 +26,34 @@ public class WishController {
 
     @GetMapping
     public ResponseEntity<List<WishItemResponse>> getWishList(
-        @LoginMember Member member
+        @LoginMember AuthenticatedMember member
     ) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(
-                wishService.getWishListByMemberId(member.getIdentifyNumber())
+                wishService.getWishListByMemberId(member.id())
                     .stream().map(wishItem -> WishItemResponse.from(wishItem)).toList()
             );
     }
 
     @PostMapping
     public ResponseEntity<WishItemResponse> addWishItem(
-        @LoginMember Member member,
+        @LoginMember AuthenticatedMember member,
         @RequestBody @Valid AddWishItemRequest request
     ) {
+        WishItem created = wishService.addWishItem(member.id(), request.productId());
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(
-                WishItemResponse.from(
-                        wishService.addWishItem(member.getIdentifyNumber(), request.productId())
-                )
-            );
+            .header("Location", "/api/wish/" + created.getId())
+            .body(WishItemResponse.from(created));
     }
 
     @DeleteMapping("/{wishItemId}")
     public ResponseEntity<Void> deleteWishItem(
-        @LoginMember Member member,
+        @LoginMember AuthenticatedMember member,
         @PathVariable Long wishItemId
     ) {
-        wishService.removeWishItemByWishId(member.getIdentifyNumber(), wishItemId);
+        wishService.removeWishItemByWishId(member.id(), wishItemId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

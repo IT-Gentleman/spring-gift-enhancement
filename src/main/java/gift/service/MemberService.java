@@ -1,11 +1,14 @@
 package gift.service;
 
+import gift.dto.AuthenticatedMember;
+import gift.dto.UpdateMemberResult;
 import gift.entity.Member;
 import gift.entity.Role;
 import gift.exception.InvalidCredentialsException;
 import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
 import gift.util.BCryptEncryptor;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -25,13 +29,11 @@ public class MemberService {
     }
 
     public Member createMember(String email, String rawPassword) {
+        checkValidMemberUpdate(email, null);
+
         String encodedPassword = BCryptEncryptor.encrypt(rawPassword);
         Member member = new Member(email, encodedPassword);
-        Optional<Long> optionalIdentifyNumber = memberRepository.createMember(member);
-        if (optionalIdentifyNumber.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Member creation failed");
-        }
-        return member.updateIdentifyNumber(optionalIdentifyNumber.get());
+        return memberRepository.save(member);
     }
 
     public String login(String email, String rawPassword) {
@@ -43,7 +45,7 @@ public class MemberService {
     }
 
     public List<Member> getMemberList() {
-        return memberRepository.getMemberList();
+        return memberRepository.findAll();
     }
 
     public Member getMemberById(Long id) {
@@ -51,26 +53,24 @@ public class MemberService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found"));
     }
 
-    public Member updateSelectivelyMember(Long id, String email, String password, Role authority) {
+    public UpdateMemberResult updateSelectivelyMember(Long id, String email, Boolean resetPassword, Role authority) {
         Member member = getMemberById(id);
-        if (!password.isEmpty()) {
-            password = BCryptEncryptor.encrypt(password);
+        checkValidMemberUpdate(email, member.getIdentifyNumber());
+        String rawPassword = null;
+        String encodedPassword = null;
+        if (resetPassword) {
+            rawPassword = generateRandomPassword(10);
+            encodedPassword = BCryptEncryptor.encrypt(rawPassword);
         }
-        throwNotFoundIfTrue(!memberRepository.updateMember(member.applyPatch(email, password, authority)));
-        return member;
+        member.applyPatch(email, encodedPassword, authority);
+        return new UpdateMemberResult(member, Optional.ofNullable(rawPassword));
     }
 
     public void deleteMember(Long id) {
-        throwNotFoundIfTrue(!memberRepository.deleteMember(id));
+        throwNotFoundIfTrue(memberRepository.deleteByIdentifyNumber(id) != 1);
     }
 
-    private void throwNotFoundIfTrue(boolean condition) {
-        if (condition) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    public Member getMemberFromToken(String token) {
+    public AuthenticatedMember getAuthenticationFromToken(String token) {
         if (token == null || !jwtTokenProvider.validateToken(token)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
@@ -79,6 +79,34 @@ public class MemberService {
         if (optionalMember.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
-        return optionalMember.get();
+        return AuthenticatedMember.from(optionalMember.get());
+    }
+
+    private void checkValidMemberUpdate(String email, Long memberId) {
+        if (!isEmailUsable(email, memberId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
+        }
+    }
+
+    private boolean isEmailUsable(String email, Long memberId) {
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        // 해당 이메일을 사용중인 멤버가 없거나, 이를 요청한 회원이 해당 이메일의 소유자일 경우 (즉, 이메일 변경이 아님)
+        return optionalMember.isEmpty() || optionalMember.get().getIdentifyNumber().equals(memberId);
+    }
+
+    private String generateRandomPassword(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        StringBuilder sb = new StringBuilder();
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        for (int i = 0; i < length; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
+    }
+
+    private void throwNotFoundIfTrue(boolean condition) {
+        if (condition) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 }

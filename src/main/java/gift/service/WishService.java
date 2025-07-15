@@ -3,15 +3,17 @@ package gift.service;
 import gift.entity.Product;
 import gift.entity.WishItem;
 import gift.repository.WishRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@Transactional
 public class WishService {
 
     private final WishRepository wishRepository;
@@ -23,28 +25,22 @@ public class WishService {
     }
 
     public List<WishItem> getWishListByMemberId(Long memberId) {
-        List<WishItem> wishList = wishRepository.getWishListByMemberId(memberId);
-        return wishList.stream().map(
-                wishItem -> wishItem.updateDetails(productService.getProductWhetherDeletedById(wishItem.productId()))
-        ).toList();
+        return wishRepository.findAllByMemberIdentifyNumber(memberId);
     }
 
     public WishItem addWishItem(Long memberId, Long productId) {
         // 상품이 존재하는지 확인 및 반환
         Product product = productService.getProductById(productId);
         try {
-            Optional<Long> optionalWishId = wishRepository.addWishItem(memberId, productId);
-            if (optionalWishId.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "WishItem creation failed");
-            }
-            return WishItem.from(product).updateId(optionalWishId.get());
-        } catch (DuplicateKeyException e) {
+            WishItem wishItem = new WishItem(memberId, product);
+            return wishRepository.save(wishItem);
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "WishItem already exists for this product");
         }
     }
 
     public void removeWishItemByWishId(Long memberId, Long wishId) {
-        if (!wishRepository.removeWishItemByMemberWishId(memberId, wishId)) {
+        if (wishRepository.removeByMemberIdentifyNumberAndId(memberId, wishId) != 1) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "WishItem not found");
         }
     }

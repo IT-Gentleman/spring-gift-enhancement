@@ -33,6 +33,7 @@ public class ProductController {
         );
         return ResponseEntity
                 .status(HttpStatus.CREATED)
+                .header("Location", "/api/products/" + created.getId())
                 .body(ProductResponse.from(created));
     }
 
@@ -62,7 +63,7 @@ public class ProductController {
             @PathVariable Long id,
             @Valid @RequestBody PatchProductRequest patch
     ) {
-        Product product = productService.updateSelectivelyProductById(
+        Product product = productService.updateProductById(
                 id,
                 patch.name(),
                 patch.price(),

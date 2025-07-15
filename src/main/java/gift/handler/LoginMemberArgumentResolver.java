@@ -40,6 +40,6 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             throw new IllegalArgumentException("Invalid or missing authorization header");
         }
         String token = authority.split("Bearer ")[1].trim();
-        return memberService.getMemberFromToken(token);
+        return memberService.getAuthenticationFromToken(token);
     }
 }

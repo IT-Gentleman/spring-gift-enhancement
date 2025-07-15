@@ -1,6 +1,7 @@
 package gift.controller;
 
 import gift.dto.LoginMemberRequest;
+import gift.exception.InvalidCredentialsException;
 import gift.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -60,7 +61,7 @@ public class LoginAdminPageController {
             redirectAttributes.addFlashAttribute("message", "Login successful.");
             return "redirect:/admin";
 
-        } catch (ResponseStatusException e) {
+        } catch (InvalidCredentialsException e) {
             model.addAttribute("member", request);
             model.addAttribute("message", "Login failed: Invalid credentials.");
             response.setStatus(HttpStatus.FORBIDDEN.value());

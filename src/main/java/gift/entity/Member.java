@@ -1,13 +1,32 @@
 package gift.entity;
 
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table
 public class Member {
 
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long identifyNumber;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
     private Role authority;
 
-    public Member() {}
+    @OneToMany(mappedBy = "member")
+    //@JoinColumn(name = "member_id", nullable = false)
+    private List<WishItem> wishlist;
+
+    protected Member() {}
 
     public Member(Long identifyNumber, String email, String password, Role authority) {
         this.identifyNumber = identifyNumber;
@@ -17,21 +36,19 @@ public class Member {
     }
 
     public Member(String email, String password) {
-        this.email = email;
-        this.password = password;
-        this.authority = Role.ROLE_USER;
+        this(null, email, password, Role.ROLE_USER);
     }
 
-    public Member updateIdentifyNumber(Long identifyNumber) {
-        return new Member(identifyNumber, email, password, authority);
+    public void setIdentifyNumber(Long identifyNumber) {
+        this.identifyNumber = identifyNumber;
     }
 
     public Long getIdentifyNumber() {
         return identifyNumber;
     }
 
-    public Member updateEmail(String email) {
-        return new Member(identifyNumber, email, password, authority);
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getEmail() {
@@ -42,18 +59,23 @@ public class Member {
         return authority;
     }
 
-    public Member updatePassword(String password) {
-        return new Member(identifyNumber, email, password, authority);
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getPassword() {
         return password;
     }
 
-    public Member applyPatch(String email, String password, Role authority) {
-        String updatedEmail = email != null ? email : this.email;
-        String updatedPassword = !(password == null || password.isEmpty()) ? password : this.password;
-        Role updateAuthority = authority != null ? authority : this.authority;
-        return new Member(identifyNumber, updatedEmail, updatedPassword, updateAuthority);
+    public void applyPatch(String email, String password, Role authority) {
+        if (email != null) {
+            this.email = email;
+        }
+        if (password != null) {
+            this.password = password;
+        }
+        if (authority != null) {
+            this.authority = authority;
+        }
     }
 }
