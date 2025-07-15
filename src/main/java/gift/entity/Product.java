@@ -1,19 +1,35 @@
 package gift.entity;
 
+import jakarta.persistence.*;
+
 import java.util.List;
 
+@Entity
+@Table
 public class Product {
 
     private static final List<String> prohibitedNames = List.of("카카오");
 
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private Integer price;
+
+    @Column(name = "image_url", nullable = false)
     private String imageUrl;
+
+    @Column(nullable = false)
     private Boolean validated;
+
+    @Column(nullable = false)
     private Boolean deleted = false;
 
-    public Product() {}
+    protected Product() {}
 
     public Product(Long id, String name, Integer price, String imageUrl, Boolean validated) {
         this.id = id;
@@ -23,7 +39,7 @@ public class Product {
         this.validated = validated;
     }
 
-    // this constructor is used only for the repository
+    // this constructor is used only for the repository row mapper
     public Product(Long id, String name, Integer price, String imageUrl, Boolean validated, Boolean deleted) {
         this.id = id;
         this.name = name;
@@ -40,56 +56,65 @@ public class Product {
         this.validated = checkValidatedByName(name);
     }
 
-    public Product updateId(Long id) {
-        return new Product(id, name, price, imageUrl, validated);
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() {
         return id;
     }
 
-    public Product updateName(String name) {
-        return new Product(id, name, price, imageUrl, validated);
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getName() {
         return name;
     }
 
-    public Product updatePrice(Integer price) {
-        return new Product(id, name, price, imageUrl, validated);
+    public void setPrice(Integer price) {
+        this.price = price;
     }
 
     public Integer getPrice() {
         return price;
     }
 
-    public Product updateImageUrl(String imageUrl) {
-        return new Product(id, name, price, imageUrl, validated);
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getImageUrl() {
         return imageUrl;
     }
 
-    public Product updateValidated(Boolean validated) {
-        return new Product(id, name, price, imageUrl, validated);
+    public void setValidated(Boolean validated) {
+        this.validated = validated;
     }
 
-    public Boolean getValidated() {
+    public Boolean isValidated() {
         return validated;
     }
 
-    public Boolean getDeleted() {
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Boolean isDeleted() {
         return deleted;
     }
 
-    public Product applyPatch(String name, Integer price, String imageUrl) {
-        String updatedName = name != null ? name : this.name;
-        Integer updatedPrice = price != null ? price : this.price;
-        String updatedimageUrl = imageUrl != null ? imageUrl : this.imageUrl;
-        Boolean updatedValidated = checkValidatedByName(updatedName);
-        return new Product(id, updatedName, updatedPrice, updatedimageUrl, updatedValidated);
+    public void applyPatch(String name, Integer price, String imageUrl) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (price != null) {
+            this.price = price;
+        }
+        if (imageUrl != null) {
+            this.imageUrl = imageUrl;
+        }
+        this.validated = checkValidatedByName(this.name);
     }
 
     private Boolean checkValidatedByName(String name) {

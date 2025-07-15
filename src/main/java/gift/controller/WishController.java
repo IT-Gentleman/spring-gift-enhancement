@@ -4,6 +4,7 @@ import gift.dto.AddWishItemRequest;
 import gift.dto.AuthenticatedMember;
 import gift.dto.WishItemResponse;
 import gift.entity.Member;
+import gift.entity.WishItem;
 import gift.service.WishService;
 import gift.validator.LoginMember;
 import jakarta.validation.Valid;
@@ -40,13 +41,11 @@ public class WishController {
         @LoginMember AuthenticatedMember member,
         @RequestBody @Valid AddWishItemRequest request
     ) {
+        WishItem created = wishService.addWishItem(member.id(), request.productId());
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(
-                WishItemResponse.from(
-                        wishService.addWishItem(member.id(), request.productId())
-                )
-            );
+            .header("Location", "/api/wish/" + created.getId())
+            .body(WishItemResponse.from(created));
     }
 
     @DeleteMapping("/{wishItemId}")

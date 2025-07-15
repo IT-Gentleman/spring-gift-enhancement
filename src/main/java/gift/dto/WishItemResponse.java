@@ -14,12 +14,12 @@ public record WishItemResponse(
 ) {
     public static WishItemResponse from(WishItem wishItem) {
         return new WishItemResponse(
-                wishItem.id(),
-                wishItem.productId(),
-                wishItem.productName(),
-                wishItem.productImageUrl(),
-                wishItem.deleted(),
-                wishItem.addedAt()
+                wishItem.getId(),
+                wishItem.getProduct().getId(),
+                wishItem.getProduct().getName(),
+                wishItem.getProduct().getImageUrl(),
+                wishItem.getProduct().isDeleted(),
+                wishItem.getAddedAt()
         );
     }
 }

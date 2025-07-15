@@ -8,6 +8,7 @@ import gift.exception.InvalidCredentialsException;
 import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
 import gift.util.BCryptEncryptor;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -31,11 +33,7 @@ public class MemberService {
 
         String encodedPassword = BCryptEncryptor.encrypt(rawPassword);
         Member member = new Member(email, encodedPassword);
-        Optional<Long> optionalIdentifyNumber = memberRepository.createMember(member);
-        if (optionalIdentifyNumber.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Member creation failed");
-        }
-        return member.updateIdentifyNumber(optionalIdentifyNumber.get());
+        return memberRepository.save(member);
     }
 
     public String login(String email, String rawPassword) {
@@ -47,7 +45,7 @@ public class MemberService {
     }
 
     public List<Member> getMemberList() {
-        return memberRepository.getMemberList();
+        return memberRepository.findAll();
     }
 
     public Member getMemberById(Long id) {
@@ -64,12 +62,12 @@ public class MemberService {
             rawPassword = generateRandomPassword(10);
             encodedPassword = BCryptEncryptor.encrypt(rawPassword);
         }
-        throwNotFoundIfTrue(!memberRepository.updateMember(member.applyPatch(email, encodedPassword, authority)));
+        member.applyPatch(email, encodedPassword, authority);
         return new UpdateMemberResult(member, Optional.ofNullable(rawPassword));
     }
 
     public void deleteMember(Long id) {
-        throwNotFoundIfTrue(!memberRepository.deleteMember(id));
+        throwNotFoundIfTrue(memberRepository.deleteByIdentifyNumber(id) != 1);
     }
 
     public AuthenticatedMember getAuthenticationFromToken(String token) {

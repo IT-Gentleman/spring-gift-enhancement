@@ -2,11 +2,9 @@ package gift.controller;
 
 import gift.entity.Member;
 import gift.entity.Role;
+import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -19,15 +17,16 @@ import org.springframework.web.client.RestClient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(scripts = "/clear_member_table.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ProductAdminPageAuthorizationTest {
 
     private final String baseUrl = "http://localhost:";
 
     @LocalServerPort
     private int port;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -41,6 +40,11 @@ class ProductAdminPageAuthorizationTest {
 
         Member user = new Member(0L, "md@example.com", "mdpassword123456789", Role.ROLE_MD);
         mdToken = jwtTokenProvider.createToken(user);
+    }
+
+    @AfterEach
+    void tearDown() {
+        memberRepository.deleteAll();
     }
 
     @Nested

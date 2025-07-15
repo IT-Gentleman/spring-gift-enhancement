@@ -69,7 +69,7 @@ public class ProductAdminPageController {
                 request.price(),
                 request.imageUrl()
         );
-        redirectAttributes.addFlashAttribute("message", writeMessageWithValidated("Product created", created.getValidated()));
+        redirectAttributes.addFlashAttribute("message", writeMessageWithValidated("Product created", created.isValidated()));
         return "redirect:/admin/products/" + created.getId();
     }
 
@@ -91,8 +91,8 @@ public class ProductAdminPageController {
     ) {
         Product product = productService.getProductWhetherDeletedById(id);
         UpdateProductRequest dto = UpdateProductRequest.from(product);
-        Boolean validated = product.getValidated();
-        Boolean deleted = product.getDeleted();
+        Boolean validated = product.isValidated();
+        Boolean deleted = product.isDeleted();
         model.addAttribute("productId", id);
         model.addAttribute("product", dto);
         model.addAttribute("validated", validated);
@@ -111,8 +111,8 @@ public class ProductAdminPageController {
         if (bindingResult.hasErrors()) {
             Product originalProduct = productService.getProductWhetherDeletedById(id);
             model.addAttribute("productId", id);
-            model.addAttribute("validated", originalProduct.getValidated());
-            if (originalProduct.getDeleted()) {
+            model.addAttribute("validated", originalProduct.isValidated());
+            if (originalProduct.isDeleted()) {
                 model.addAttribute("message", "This product has been deleted and cannot be modified.");
                 model.addAttribute("product", UpdateProductRequest.from(originalProduct));
                 model.addAttribute("deleted", true);
@@ -132,7 +132,7 @@ public class ProductAdminPageController {
                 request.price(),
                 request.imageUrl()
         );
-        redirectAttributes.addFlashAttribute("message", writeMessageWithValidated("Product updated", updated.getValidated()));
+        redirectAttributes.addFlashAttribute("message", writeMessageWithValidated("Product updated", updated.isValidated()));
         return "redirect:/admin/products/" + id;
     }
 

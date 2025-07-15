@@ -1,18 +1,17 @@
-package gift.controller;
+package gift.e2e;
 
 import gift.dto.LoginMemberRequest;
 import gift.dto.LoginMemberResponse;
 import gift.dto.RegisterMemberRequest;
 import gift.dto.RegisterMemberResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import gift.repository.MemberRepository;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
@@ -20,19 +19,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql("/clear_member_table.sql")
-class MemberControllerTest {
+class MemberE2ETest {
 
     private final String baseUrl = "http://localhost:";
 
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     private RestClient restClient;
 
     @BeforeEach
     void setUp() {
         restClient = RestClient.create();
+    }
+
+    @AfterEach
+    void tearDown() {
+        memberRepository.deleteAll();
     }
 
     @Nested

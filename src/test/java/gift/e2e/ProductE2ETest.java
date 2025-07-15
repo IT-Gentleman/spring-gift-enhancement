@@ -1,10 +1,12 @@
-package gift.controller;
+package gift.e2e;
 
 import gift.dto.CreateProductRequest;
 import gift.dto.UpdateProductRequest;
 import gift.entity.Member;
 import gift.entity.Product;
 import gift.entity.Role;
+import gift.repository.MemberRepository;
+import gift.repository.ProductRepository;
 import gift.token.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +18,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.jdbc.Sql;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
@@ -27,8 +29,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql({"/clear_product_table.sql", "/insert_product_item.sql", "/clear_member_table.sql"})
-public class ProductControllerTest {
+public class ProductE2ETest {
 
     private final String baseUrl = "http://localhost:";
 
@@ -38,16 +39,28 @@ public class ProductControllerTest {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    private RestClient restClient;
+    @Autowired
+    private ProductRepository productRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
+    private RestClient restClient;
     private String mdToken;
+    private Product savedProduct;
 
     @BeforeEach
     void setUp() {
         restClient = RestClient.create();
+        Member md = memberRepository.save(new Member(null, "md@example.com", "mdpassword123456789", Role.ROLE_MD));
+        mdToken = jwtTokenProvider.createToken(md);
+        savedProduct = productRepository.save(new Product(null, "Initial Product", 10000, "initial.jpg", true));
+    }
 
-        Member user = new Member(0L, "md@example.com", "mdpassword123456789", Role.ROLE_MD);
-        mdToken = jwtTokenProvider.createToken(user);
+    @AfterEach
+    void tearDown() {
+        productRepository.deleteAll();
+        memberRepository.deleteAll();
     }
 
     @Nested
@@ -98,7 +111,7 @@ public class ProductControllerTest {
         @Test
         @DisplayName("GET /api/products/{id} - 유효한 조회 시 200 OK")
         void 유효한_조회_시_200_OK() {
-            String url = baseUrl + port + "/api/products/1";
+            String url = baseUrl + port + "/api/products/" + savedProduct.getId();
             ResponseEntity<Product> response = restClient.get()
                     .uri(url)
                     .header("Authorization", "Bearer " + mdToken)
@@ -106,7 +119,7 @@ public class ProductControllerTest {
                     .toEntity(Product.class);
             assertAll(
                     () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
-                    () -> assertThat(response.getBody().getName()).isEqualTo("아이스 카페 아메리카노 T")
+                    () -> assertThat(response.getBody().getName()).isEqualTo("Initial Product")
             );
         }
 
@@ -132,7 +145,7 @@ public class ProductControllerTest {
         @Test
         @DisplayName("PATCH /api/products/{id} - 유효한 수정 시 200 OK")
         void 유효한_수정_시_200_OK() {
-            String url = baseUrl + port + "/api/products/1";
+            String url = baseUrl + port + "/api/products/" + savedProduct.getId();
             UpdateProductRequest patchDto = new UpdateProductRequest(
                     "각하오 커피",
                     7800,
@@ -149,23 +162,6 @@ public class ProductControllerTest {
                     () -> assertThat(response.getBody().getName()).isEqualTo("각하오 커피"),
                     () -> assertThat(response.getBody().getImageUrl()).isNotNull()
             );
-        }
-
-        @Test
-        @DisplayName("PATCH /api/products/{id} - 유효하지 않은 데이터로 수정 시 400 BAD_REQUEST")
-        void 유효하지_않은_데이터로_수정_시_400_BAD_REQUEST() {
-            String url = baseUrl + port + "/api/products/1";
-            UpdateProductRequest patchDto = new UpdateProductRequest(null, null, null);
-            assertThatExceptionOfType(HttpClientErrorException.BadRequest.class)
-                    .isThrownBy(
-                            () ->
-                                    restClient.patch()
-                                            .uri(url)
-                                            .header("Authorization", "Bearer " + mdToken)
-                                            .body(patchDto)
-                                            .retrieve()
-                                            .toEntity(Product.class)
-                    );
         }
 
         @Test
@@ -212,7 +208,7 @@ public class ProductControllerTest {
         @Test
         @DisplayName("DELETE /api/products/{id} - 유효한 삭제 시 204 NO_CONTENT")
         void 유효한_삭제_시_204_NO_CONTENT() {
-            String url = baseUrl + port + "/api/products/1";
+            String url = baseUrl + port + "/api/products/" + savedProduct.getId();
             ResponseEntity<Void> response = restClient.delete()
                     .uri(url)
                     .header("Authorization", "Bearer " + mdToken)

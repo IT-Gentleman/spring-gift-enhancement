@@ -1,28 +1,56 @@
 package gift.entity;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
-public record WishItem (
-        Long id,
-        Long productId,
-        String productName,
-        String productImageUrl,
-        Boolean deleted,
-        LocalDateTime addedAt
-) {
-    public WishItem(Long id, Long productId, LocalDateTime addedAt) {
-        this(id, productId, null, null, null, addedAt);
+@Entity
+@Table(name = "wish")
+public class WishItem {
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    Member member;
+
+    @OneToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    Product product;
+
+    @Column(name = "added_at", nullable = false)
+    LocalDateTime addedAt;
+
+    protected WishItem() {}
+
+    public WishItem(Long id, Member member, Product product, LocalDateTime addedAt) {
+        this.id = id;
+        this.member = member;
+        this.product = product;
+        this.addedAt = addedAt;
     }
 
-    public WishItem updateId(Long id) {
-        return new WishItem(id, productId, productName, productImageUrl, deleted, addedAt);
+    public WishItem(Long memberId, Product product) {
+        this.member = new Member(memberId, null, null, null);
+        this.product = product;
+        this.addedAt = LocalDateTime.now();
     }
 
-    public WishItem updateDetails(Product product) {
-        return new WishItem(id, product.getId(), product.getName(), product.getImageUrl(), product.getDeleted(), addedAt);
+    public Long getId() {
+        return id;
     }
 
-    public static WishItem from(Product product) {
-        return new WishItem(null, product.getId(), product.getName(), product.getImageUrl(), product.getDeleted(), LocalDateTime.now());
+    public Member getMember() {
+        return member;
     }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public LocalDateTime getAddedAt() {
+        return addedAt;
+    }
+
 }

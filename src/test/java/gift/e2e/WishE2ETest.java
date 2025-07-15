@@ -1,25 +1,24 @@
-package gift.controller;
+package gift.e2e;
 
 import gift.dto.AddWishItemRequest;
-import gift.dto.AuthenticatedMember;
 import gift.dto.WishItemResponse;
 import gift.entity.Member;
+import gift.entity.Product;
 import gift.entity.Role;
 import gift.entity.WishItem;
-import gift.service.MemberService;
+import gift.repository.MemberRepository;
+import gift.repository.ProductRepository;
+import gift.repository.WishRepository;
 import gift.token.JwtTokenProvider;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
@@ -27,11 +26,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql("/clear_wish_table.sql")
-class WishControllerTest {
+public class WishE2ETest {
 
     private final String baseUrl = "http://localhost:";
 
@@ -39,23 +36,36 @@ class WishControllerTest {
     private int port;
 
     @Autowired
+    private WishRepository wishRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @MockitoBean
-    private MemberService memberService;
-
     private RestClient restClient;
-
     private String userToken;
+    private Member savedUser;
+    private Product savedProduct1;
+    private Product savedProduct2;
 
     @BeforeEach
     void setUp() {
         restClient = RestClient.create();
 
-        Member user = new Member(0L, "user@examle.com", "userpassword123456789", Role.ROLE_USER);
-        userToken = jwtTokenProvider.createToken(user);
+        savedUser = memberRepository.save(new Member(null, "user@example.com", "password123456789", Role.ROLE_USER));
+        userToken = jwtTokenProvider.createToken(savedUser);
 
-        when(memberService.getAuthenticationFromToken(userToken)).thenReturn(AuthenticatedMember.from(user));
+        savedProduct1 = productRepository.save(new Product(null, "Product 1", 1000, "prod1.jpg", true));
+        savedProduct2 = productRepository.save(new Product(null, "Product 2", 2000, "prod2.jpg", true));
+    }
+
+    @AfterEach
+    void tearDown() {
+        wishRepository.deleteAll();
+        productRepository.deleteAll();
+        memberRepository.deleteAll();
     }
 
     @Nested
@@ -66,14 +76,18 @@ class WishControllerTest {
         @Test
         @DisplayName("GET /api/wishes - 위시리스트 조회 시 200 OK")
         void 위시리스트_조회_시_200_OK() {
-            ResponseEntity<List<WishItem>> response = restClient.get()
+            wishRepository.save(new WishItem(savedUser.getIdentifyNumber(), savedProduct1));
+
+            ResponseEntity<List<WishItemResponse>> response = restClient.get()
                     .uri(url)
                     .header("Authorization", "Bearer " + userToken)
                     .retrieve()
-                    .toEntity(new ParameterizedTypeReference<List<WishItem>>() {});
+                    .toEntity(new ParameterizedTypeReference<>() {});
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().size()).isEqualTo(1);
+            assertThat(response.getBody().get(0).productName()).isEqualTo("Product 1");
         }
 
         @Test
@@ -95,7 +109,8 @@ class WishControllerTest {
         @Test
         @DisplayName("POST /api/wishes - 유효한 아이템 추가 시 201 CREATED")
         void 유효한_아이템_추가_시_201_CREATED() {
-            AddWishItemRequest request = new AddWishItemRequest(1L);
+            AddWishItemRequest request = new AddWishItemRequest(savedProduct1.getId());
+
             ResponseEntity<WishItemResponse> response = restClient.post()
                     .uri(url)
                     .header("Authorization", "Bearer " + userToken)
@@ -105,12 +120,13 @@ class WishControllerTest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
             assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().productId()).isEqualTo(savedProduct1.getId());
         }
 
         @Test
         @DisplayName("POST /api/wishes - 유효하지 않은 아이템 추가 시 404 NOT_FOUND")
         void 유효하지_않은_아이템_추가_시_404_NOT_FOUND() {
-            AddWishItemRequest request = new AddWishItemRequest(0L);
+            AddWishItemRequest request = new AddWishItemRequest(9999L);
             assertThatExceptionOfType(HttpClientErrorException.NotFound.class)
                     .isThrownBy(() -> restClient.post()
                             .uri(url)
@@ -123,14 +139,9 @@ class WishControllerTest {
         @Test
         @DisplayName("POST /api/wishes - 이미 존재하는 아이템 추가 시 409 CONFLICT")
         void 이미_존재하는_아이템_추가_시_409_CONFLICT() {
-            AddWishItemRequest request = new AddWishItemRequest(1L);
             // 첫 번째 추가
-            restClient.post()
-                    .uri(url)
-                    .header("Authorization", "Bearer " + userToken)
-                    .body(request)
-                    .retrieve()
-                    .toEntity(WishItemResponse.class);
+            wishRepository.save(new WishItem(savedUser.getIdentifyNumber(), savedProduct1));
+            AddWishItemRequest request = new AddWishItemRequest(savedProduct1.getId());
 
             // 두 번째 추가 시도
             assertThatExceptionOfType(HttpClientErrorException.Conflict.class)
@@ -154,7 +165,6 @@ class WishControllerTest {
     }
 
     @Nested
-    @Sql({"/clear_member_table.sql","/clear_wish_table.sql","/insert_member_item.sql", "/insert_wish_item.sql"})
     @DisplayName("DELETE /api/wishes/{wishItemId} - 위시리스트 아이템 삭제 테스트")
     class DeleteWish {
         String url = baseUrl + port + "/api/wishes";
@@ -162,10 +172,10 @@ class WishControllerTest {
         @Test
         @DisplayName("DELETE /api/wishes/{wishItemId} - 유효한 아이템 삭제 시 204 NO_CONTENT")
         void 유효한_아이템_삭제_시_204_NO_CONTENT() {
-            Long wishItemId = 100L;
+            WishItem wishItem = wishRepository.save(new WishItem(savedUser.getIdentifyNumber(), savedProduct1));
 
             ResponseEntity<Void> response = restClient.delete()
-                    .uri(url + "/" + wishItemId)
+                    .uri(url + "/" + wishItem.getId())
                     .header("Authorization", "Bearer " + userToken)
                     .retrieve()
                     .toEntity(Void.class);
@@ -176,12 +186,9 @@ class WishControllerTest {
         @Test
         @DisplayName("DELETE /api/wishes/{wishItemId} - 존재하지 않는 아이템 삭제 시 404 NOT_FOUND")
         void 존재하지_않는_아이템_삭제_시_404_NOT_FOUND() {
-            // 존재하지 않는 wishItemId
-            Long invalidWishItemId = 150L;
-
             assertThatExceptionOfType(HttpClientErrorException.NotFound.class)
                     .isThrownBy(() -> restClient.delete()
-                            .uri(url + "/" + invalidWishItemId)
+                            .uri(url + "/" + 9999L)
                             .header("Authorization", "Bearer " + userToken)
                             .retrieve()
                             .toEntity(Void.class));
@@ -190,12 +197,13 @@ class WishControllerTest {
         @Test
         @DisplayName("DELETE /api/wishes/{wishItemId} - 다른 사용자의 아이템 삭제 시 404 NOT_FOUND")
         void 다른_사용자의_아이템_삭제_시_404_NOT_FOUND() {
-            // 다른 사용자가 소유한 wishItemId
-            Long otherUserWishItemId = 200L;
+            Member otherUser = memberRepository.save(new Member(null, "", "", Role.ROLE_USER));
+            WishItem otherUsersWishItem = wishRepository.save(new WishItem(otherUser.getIdentifyNumber(), savedProduct1));
+
 
             assertThatExceptionOfType(HttpClientErrorException.NotFound.class)
                     .isThrownBy(() -> restClient.delete()
-                            .uri(url + "/" + otherUserWishItemId)
+                            .uri(url + "/" + otherUsersWishItem.getId())
                             .header("Authorization", "Bearer " + userToken)
                             .retrieve()
                             .toEntity(Void.class));
