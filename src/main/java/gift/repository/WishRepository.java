@@ -10,6 +10,7 @@ import java.util.List;
 public interface WishRepository extends JpaRepository<Wish, Long> {
 
     List<Wish> findAllByMemberId(Long memberId);
+    boolean existsByMemberIdAndProductId(Long memberId, Long productId);
     boolean existsByIdAndMemberId(Long wishId, Long memberId);
     void deleteByIdAndMemberId(Long wishId, Long memberId);
 }

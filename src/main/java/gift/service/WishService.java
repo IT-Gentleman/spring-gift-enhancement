@@ -30,12 +30,12 @@ public class WishService {
     public Wish addWishItem(Long memberId, Long productId) {
         // 상품이 존재하는지 확인 및 반환
         Product product = productService.getProductById(productId);
-        try {
-            Wish wish = new Wish(memberId, product);
-            return wishRepository.save(wish);
-        } catch (Exception e) {
+
+        if (wishRepository.existsByMemberIdAndProductId(memberId, productId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Wish already exists for this product");
         }
+        Wish wish = new Wish(memberId, product);
+        return wishRepository.save(wish);
     }
 
     @Transactional

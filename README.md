@@ -53,7 +53,7 @@
   - [x] MemberService 클래스의 `generateRandomPassword` 메소드 위치 변경
     - 별도 utility 클래스로 분리하여 `PasswordUtils` 클래스에 위치
 #### [fix]
-- [ ] Wish 테이블 수정
+- [x] Wish 테이블 수정
   - Product와의 연관관계 매핑 변경 : `@OneToOne`에서 `@ManyToOne` 어노테이션으로 변경하여, 여러명(여러 Wish)이 하나의 Product를 참조할 수 있도록 조치
 
 ## TODO
