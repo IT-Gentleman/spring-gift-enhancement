@@ -1,5 +1,6 @@
 package gift.service;
 
+import gift.entity.Member;
 import gift.entity.Product;
 import gift.entity.Wish;
 import gift.repository.WishRepository;
@@ -34,7 +35,7 @@ public class WishService {
         if (wishRepository.existsByMemberIdAndProductId(memberId, productId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Wish already exists for this product");
         }
-        Wish wish = new Wish(memberId, product);
+        Wish wish = new Wish(Member.emptyOfId(memberId), product);
         return wishRepository.save(wish);
     }
 

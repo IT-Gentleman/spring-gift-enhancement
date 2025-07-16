@@ -23,15 +23,9 @@ public class Wish {
 
     protected Wish() {}
 
-    public Wish(Long id, Member member, Product product, LocalDateTime addedAt) {
-        this.id = id;
+    // Constructor for wish creation (and its test code)
+    public Wish(Member member, Product product) {
         this.member = member;
-        this.product = product;
-        this.addedAt = addedAt;
-    }
-
-    public Wish(Long memberId, Product product) {
-        this.member = new Member(memberId, null, null, null);
         this.product = product;
         this.addedAt = LocalDateTime.now();
     }

@@ -55,8 +55,8 @@ public class WishE2ETest {
         savedUser = memberRepository.save(new Member(null, "user@example.com", "password123456789", Role.ROLE_USER));
         userToken = jwtTokenProvider.createToken(savedUser);
 
-        savedProduct1 = productRepository.save(new Product(null, "Product 1", 1000, "prod1.jpg", true));
-        savedProduct2 = productRepository.save(new Product(null, "Product 2", 2000, "prod2.jpg", true));
+        savedProduct1 = productRepository.save(new Product(null, "Product 1", 1000, "prod1.jpg", true, false));
+        savedProduct2 = productRepository.save(new Product(null, "Product 2", 2000, "prod2.jpg", true, false));
     }
 
     @AfterEach
@@ -74,7 +74,7 @@ public class WishE2ETest {
         @Test
         @DisplayName("GET /api/wishes - 위시리스트 조회 시 200 OK")
         void 위시리스트_조회_시_200_OK() {
-            wishRepository.save(new Wish(savedUser.getId(), savedProduct1));
+            wishRepository.save(new Wish(savedUser, savedProduct1));
 
             ResponseEntity<List<WishItemResponse>> response = restClient.get()
                     .uri(url)
@@ -138,7 +138,7 @@ public class WishE2ETest {
         @DisplayName("POST /api/wishes - 이미 존재하는 아이템 추가 시 409 CONFLICT")
         void 이미_존재하는_아이템_추가_시_409_CONFLICT() {
             // 첫 번째 추가
-            wishRepository.save(new Wish(savedUser.getId(), savedProduct1));
+            wishRepository.save(new Wish(savedUser, savedProduct1));
             AddWishItemRequest request = new AddWishItemRequest(savedProduct1.getId());
 
             // 두 번째 추가 시도
@@ -170,7 +170,7 @@ public class WishE2ETest {
         @Test
         @DisplayName("DELETE /api/wishes/{wishItemId} - 유효한 아이템 삭제 시 204 NO_CONTENT")
         void 유효한_아이템_삭제_시_204_NO_CONTENT() {
-            Wish wish = wishRepository.save(new Wish(savedUser.getId(), savedProduct1));
+            Wish wish = wishRepository.save(new Wish(savedUser, savedProduct1));
 
             ResponseEntity<Void> response = restClient.delete()
                     .uri(url + "/" + wish.getId())
@@ -196,7 +196,7 @@ public class WishE2ETest {
         @DisplayName("DELETE /api/wishes/{wishItemId} - 다른 사용자의 아이템 삭제 시 404 NOT_FOUND")
         void 다른_사용자의_아이템_삭제_시_404_NOT_FOUND() {
             Member otherUser = memberRepository.save(new Member(null, "", "", Role.ROLE_USER));
-            Wish otherUsersWish = wishRepository.save(new Wish(otherUser.getId(), savedProduct1));
+            Wish otherUsersWish = wishRepository.save(new Wish(otherUser, savedProduct1));
 
 
             assertThatExceptionOfType(HttpClientErrorException.NotFound.class)

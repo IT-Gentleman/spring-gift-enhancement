@@ -54,7 +54,7 @@ public class ProductE2ETest {
         restClient = RestClient.create();
         Member md = memberRepository.save(new Member(null, "md@example.com", "mdpassword123456789", Role.ROLE_MD));
         mdToken = jwtTokenProvider.createToken(md);
-        savedProduct = productRepository.save(new Product(null, "Initial Product", 10000, "initial.jpg", true));
+        savedProduct = productRepository.save(new Product(null, "Initial Product", 10000, "initial.jpg", true, false));
     }
 
     @AfterEach

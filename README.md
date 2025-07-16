@@ -32,6 +32,7 @@
   - [x] Wish 테이블(기존 WishItem 클래스) 리펙터링
     - 클래스명을 `Wish`로 변경 : 테이블명인 `wish`와 클래스명인 `WishItem`의 불일치 해결 목적
     - 접근제어자 추가 : `default`(미기재)에서 `private`로 변경하여 외부에서 접근 불가하도록 조치
+  - [x] 엔티티의 생성자 정리 (생성자 통폐합 및 불필요 생성자 제거)
 - Dto 클래스
   - [x] `UpdateMemberResult` Dto 리팩터링
     - `UpdateMemberResponse`로 이름 변경 : Dto의 이름은 Request와 Response로 통일

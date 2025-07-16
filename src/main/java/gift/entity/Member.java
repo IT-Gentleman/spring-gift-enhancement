@@ -26,6 +26,7 @@ public class Member {
 
     protected Member() {}
 
+    // all arguments constructor for test code
     public Member(Long id, String email, String password, Role role) {
         this.id = id;
         this.email = email;
@@ -33,8 +34,16 @@ public class Member {
         this.role = role;
     }
 
+    // constructor for member creation. Use as a factory method
+    public Member(String email, String password, Role role) {
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
+    // constructor for member creation with default role as ROLE_USER (for api)
     public Member(String email, String password) {
-        this(null, email, password, Role.ROLE_USER);
+        this(email, password, Role.ROLE_USER);
     }
 
     public Long getId() {
@@ -71,5 +80,11 @@ public class Member {
         if (authority != null) {
             this.role = authority;
         }
+    }
+
+    public static Member emptyOfId(Long id) {
+        Member member = new Member();
+        member.id = id;
+        return member;
     }
 }

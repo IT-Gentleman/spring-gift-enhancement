@@ -61,10 +61,8 @@ class WishRepositoryTest {
         @DisplayName("정상적인 위시 아이템 데이터 삽입")
         void 정상적인_위시_아이템_삽입_시_정상반환() {
             Wish wish = new Wish(
-                    null,
                     existingMember,
-                    existingProduct,
-                    LocalDateTime.now()
+                    existingProduct
             );
             Wish savedWish = wishRepository.save(wish);
             assertAll(
@@ -77,15 +75,14 @@ class WishRepositoryTest {
         @Test
         @DisplayName("null 값이 포함된 위시 아이템 데이터 삽입 시 예외 발생")
         void 널_값이_포함된_위시_아이템_삽입_시_예외_발생() {
-            // id는 항상 null인 상태로 삽입되어야 함
 
-            Wish allNullWish = new Wish(null, null, null, null);
+            Wish allNullWish = new Wish(null, null);
             Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(allNullWish));
 
-            Wish memberNullWish = new Wish(null, null, existingProduct, LocalDateTime.now());
+            Wish memberNullWish = new Wish(null, existingProduct);
             Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(memberNullWish));
 
-            Wish productNullWish = new Wish(null, existingMember, null, LocalDateTime.now());
+            Wish productNullWish = new Wish(existingMember, null);
             Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(productNullWish));
         }
 
@@ -96,10 +93,8 @@ class WishRepositoryTest {
             Member nonExistentMember = new Member(999L, null, null, null);
             Product nonExistentProduct = new Product(999L, null, null, null, null, null);
             Wish wish = new Wish(
-                  null,
                     nonExistentMember,
-                    nonExistentProduct,
-                    LocalDateTime.now()
+                    nonExistentProduct
             );
             Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(wish));
         }
@@ -113,10 +108,8 @@ class WishRepositoryTest {
         @DisplayName("정상적인 memberId로 위시 리스트 조회")
         void 정상적인_memberId로_위시_리스트_조회() {
             Wish wish = new Wish(
-                    null,
                     existingMember,
-                    existingProduct,
-                    LocalDateTime.now()
+                    existingProduct
             );
             wishRepository.save(wish);
 
@@ -145,10 +138,8 @@ class WishRepositoryTest {
         @DisplayName("정상적인 memberId와 wishId로 위시 아이템 삭제 시 삭제")
         void 정상적인_memberId와_productId로_위시_아이템_삭제_시_삭제() {
             Wish wish = new Wish(
-                    null,
                     existingMember,
-                    existingProduct,
-                    LocalDateTime.now()
+                    existingProduct
             );
             wish = wishRepository.save(wish);
 
@@ -162,10 +153,8 @@ class WishRepositoryTest {
         void 존재하는_memberId에_대해_존재하지_않는_productId로_위시_아이템_삭제_시_미삭제() {
             // 본인 소유가 아닌 wish 삭제 시도
             Wish wish = new Wish(
-                    null,
                     existingMember,
-                    existingProduct,
-                    LocalDateTime.now()
+                    existingProduct
             );
             wish = wishRepository.save(wish);
 
