@@ -31,7 +31,7 @@
         <input type="hidden" name="_method" value="put" th:if="${memberId != null}" />
         <p th:if="${memberId != null}">
             <label>id:</label>
-            <input type="text" th:field="*{identifyNumber}" readonly="readonly" />
+            <input type="text" th:field="*{id}" readonly="readonly" />
         </p>
         <p>
             <label>email:</label>
@@ -45,7 +45,7 @@
         </p>
         <p>
             <label>role:</label>
-            <select th:field="*{authority}">
+            <select th:field="*{role}">
                 <option th:each="role : ${T(gift.entity.Role).values()}"
                         th:value="${role}"
                         th:text="${role}">

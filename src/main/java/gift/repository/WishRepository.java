@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface WishRepository extends JpaRepository<WishItem, Long> {
 
-    List<WishItem> findAllByMemberIdentifyNumber(Long memberId);
-    Integer removeByMemberIdentifyNumberAndId(Long memberId, Long wishId);
+    List<WishItem> findAllByMemberId(Long memberId);
+    boolean existsByIdAndMemberId(Long wishId, Long memberId);
+    void deleteByIdAndMemberId(Long wishId, Long memberId);
 }

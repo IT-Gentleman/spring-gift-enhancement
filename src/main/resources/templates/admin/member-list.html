@@ -40,17 +40,17 @@
         </thead>
         <tbody>
             <tr th:each="member: ${members}">
-                <td th:text="${member.identifyNumber}" />
+                <td th:text="${member.id}" />
                 <td th:text="${member.email}" />
-                <td th:text="${member.authority}" />
+                <td th:text="${member.role}" />
                 <td>
-                    <form th:action="@{/admin/members/{id}(id=${member.identifyNumber})}"
+                    <form th:action="@{/admin/members/{id}(id=${member.id})}"
                           method="get" style="display:inline">
                         <button type="submit">View/Edit</button>
                     </form>
                 </td>
                 <td>
-                    <form th:action="@{/admin/members/{id}(id=${member.identifyNumber})}"
+                    <form th:action="@{/admin/members/{id}(id=${member.id})}"
                           method="post" style="display:inline"
                           onsubmit="return confirm('Are you sure to delete?');">
                         <input type="hidden" name="_method" value="delete" />

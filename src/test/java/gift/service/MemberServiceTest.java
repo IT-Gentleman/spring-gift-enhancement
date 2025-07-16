@@ -17,7 +17,6 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,8 +64,8 @@ class MemberServiceTest {
                 assertAll(
                         () -> assertThat(resolve.getEmail()).isEqualTo(email),
                         () -> assertThat(resolve.getPassword()).isEqualTo(hashedPassword),
-                        () -> assertThat(resolve.getIdentifyNumber()).isEqualTo(1L),
-                        () -> assertThat(resolve.getAuthority()).isEqualTo(Role.ROLE_USER)
+                        () -> assertThat(resolve.getId()).isEqualTo(1L),
+                        () -> assertThat(resolve.getRole()).isEqualTo(Role.ROLE_USER)
                 );
             }
         }
@@ -161,10 +160,10 @@ class MemberServiceTest {
             UpdateMemberResult result = memberService.updateSelectivelyMember(id, newEmail, false, newRole);
 
             assertAll(
-                    () -> assertThat(result.member().getIdentifyNumber()).isEqualTo(id),
+                    () -> assertThat(result.member().getId()).isEqualTo(id),
                     () -> assertThat(result.member().getEmail()).isEqualTo(newEmail),
                     () -> assertThat(result.member().getPassword()).isEqualTo(hashedPassword),
-                    () -> assertThat(result.member().getAuthority()).isEqualTo(newRole),
+                    () -> assertThat(result.member().getRole()).isEqualTo(newRole),
                     () -> assertThat(result.temporalPassword()).isEmpty()
             );
         }
@@ -190,10 +189,10 @@ class MemberServiceTest {
                 UpdateMemberResult result = memberService.updateSelectivelyMember(id, newEmail, true, newRole);
 
                 assertAll(
-                        () -> assertThat(result.member().getIdentifyNumber()).isEqualTo(id),
+                        () -> assertThat(result.member().getId()).isEqualTo(id),
                         () -> assertThat(result.member().getEmail()).isEqualTo(newEmail),
                         () -> assertThat(result.member().getPassword()).isEqualTo(newPassword),
-                        () -> assertThat(result.member().getAuthority()).isEqualTo(newRole),
+                        () -> assertThat(result.member().getRole()).isEqualTo(newRole),
                         () -> assertThat(result.temporalPassword()).isNotEmpty()
                 );
             }

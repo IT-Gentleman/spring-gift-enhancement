@@ -23,10 +23,10 @@ public record UpdateMemberRequest (
 ) {
         public static UpdateMemberRequest from(Member member) {
                 return new UpdateMemberRequest(
-                        member.getIdentifyNumber(),
+                        member.getId(),
                         member.getEmail(),
                         false,
-                        member.getAuthority()
+                        member.getRole()
                 );
         }
 }

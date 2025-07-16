@@ -9,9 +9,9 @@ public record MemberResponse (
 ) {
     public static MemberResponse from(Member member) {
         return new MemberResponse(
-                member.getIdentifyNumber(),
+                member.getId(),
                 member.getEmail(),
-                member.getAuthority().name()
+                member.getRole().name()
         );
     }
 }

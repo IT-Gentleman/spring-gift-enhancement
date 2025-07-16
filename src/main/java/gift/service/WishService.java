@@ -4,12 +4,10 @@ import gift.entity.Product;
 import gift.entity.WishItem;
 import gift.repository.WishRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 @Service
@@ -25,7 +23,7 @@ public class WishService {
     }
 
     public List<WishItem> getWishListByMemberId(Long memberId) {
-        return wishRepository.findAllByMemberIdentifyNumber(memberId);
+        return wishRepository.findAllByMemberId(memberId);
     }
 
     public WishItem addWishItem(Long memberId, Long productId) {
@@ -40,8 +38,10 @@ public class WishService {
     }
 
     public void removeWishItemByWishId(Long memberId, Long wishId) {
-        if (wishRepository.removeByMemberIdentifyNumberAndId(memberId, wishId) != 1) {
+        if (!wishRepository.existsByIdAndMemberId(wishId, memberId)) {
+            // 본인소유가 아닌 wish의 경우는 hiding 처리됨
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "WishItem not found");
         }
+        wishRepository.deleteByIdAndMemberId(wishId, memberId);
     }
 }

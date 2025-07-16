@@ -62,7 +62,7 @@ public class MemberAdminPageController {
         Member createdMember = memberService.createMember(request.email(), request.password());
         model.addAttribute("member", UpdateMemberRequest.from(createdMember));
         redirectAttributes.addFlashAttribute("message", "Member created successfully.");
-        return "redirect:/admin/members/" + createdMember.getIdentifyNumber();
+        return "redirect:/admin/members/" + createdMember.getId();
     }
 
     @GetMapping("/{id}")

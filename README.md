@@ -26,7 +26,7 @@
 #### [refactor]
 - Entity 클래스
   - [x] 엔티티(`Member`, `Product`, `Wish`)의 id setter 제거
-  - [ ] Member 테이블의 컬럼명 변경
+  - [x] Member 테이블의 컬럼명 변경
     - `@Id` 어노테이션을 사용하는 `IdentifyNumber(identify_number)` 컬럼의 이름을 `id`로 변경
     - `Role` enum 타입의 `authority` 컬럼의 이름을 `role`로 변경
   - [ ] Wish 테이블(기존 WishItem 클래스) 리펙터링
@@ -39,13 +39,17 @@
 - Repository 클래스
   - [ ] ProductRepository 인터페이스 리펙터링
     - `findAllByDeletedIsFalseAndValidated` 메소드의 매개변수명을 `visibility`에서 컬럼명인 `validated`로 변경
-  - [ ] Repository 레이어의 메소드명 변경
+  - [x] Repository 레이어의 삭제 메소드 리펙터링
     - `removeOO` 메소드를 `deleteOO`로 변경
+    - 반환타입을 일괄 void형으로 변경
 - Service 클래스
   - [ ] Service 레이어의 `@Transactional` 어노테이션의 사용위치 변경
     - 기존 클래스 단으로 적용하던 `@Transactional` 어노테이션을 메소드별로 변경
   - [ ] Service 레이어의 `throwNotFoundException` 메소드 삭제
     - MemberService, ProductService 클래스에 해당
+  - [x] Service 레이어의 `deleteOO` 메소드 호출부 변경
+    - hard delete 사용되는 MemberService, WishService 클래스에 해당
+    - `deleteOO` 메소드가 void 타입으로 변경됨에 따라, 해당 메소드 호출부 이전에 `findOO` 메소드로 조회 후, 해당 객체가 존재하는지 여부를 확인하는 로직 추가
   - [ ] MemberService 클래스의 `generateRandomPassword` 메소드 위치 변경
     - 별도 utility 클래스로 분리하여 `PasswordUtils` 클래스에 위치
 #### [fix]

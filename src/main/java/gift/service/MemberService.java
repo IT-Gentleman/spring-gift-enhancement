@@ -55,7 +55,7 @@ public class MemberService {
 
     public UpdateMemberResult updateSelectivelyMember(Long id, String email, Boolean resetPassword, Role authority) {
         Member member = getMemberById(id);
-        checkValidMemberUpdate(email, member.getIdentifyNumber());
+        checkValidMemberUpdate(email, member.getId());
         String rawPassword = null;
         String encodedPassword = null;
         if (resetPassword) {
@@ -67,7 +67,10 @@ public class MemberService {
     }
 
     public void deleteMember(Long id) {
-        throwNotFoundIfTrue(memberRepository.deleteByIdentifyNumber(id) != 1);
+        if (!memberRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found");
+        }
+        memberRepository.deleteById(id);
     }
 
     public AuthenticatedMember getAuthenticationFromToken(String token) {
@@ -91,7 +94,7 @@ public class MemberService {
     private boolean isEmailUsable(String email, Long memberId) {
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
         // 해당 이메일을 사용중인 멤버가 없거나, 이를 요청한 회원이 해당 이메일의 소유자일 경우 (즉, 이메일 변경이 아님)
-        return optionalMember.isEmpty() || optionalMember.get().getIdentifyNumber().equals(memberId);
+        return optionalMember.isEmpty() || optionalMember.get().getId().equals(memberId);
     }
 
     private String generateRandomPassword(int length) {
