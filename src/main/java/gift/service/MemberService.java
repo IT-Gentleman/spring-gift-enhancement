@@ -8,16 +8,15 @@ import gift.exception.InvalidCredentialsException;
 import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
 import gift.util.BCryptEncryptor;
-import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -28,6 +27,7 @@ public class MemberService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    @Transactional
     public Member createMember(String email, String rawPassword) {
         checkValidMemberUpdate(email, null);
 
@@ -36,6 +36,7 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
+    @Transactional(readOnly = true)
     public String login(String email, String rawPassword) {
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
         if (optionalMember.isEmpty() || !BCryptEncryptor.matches(rawPassword, optionalMember.get().getPassword())) {
@@ -44,16 +45,20 @@ public class MemberService {
         return jwtTokenProvider.createToken(optionalMember.get());
     }
 
+    @Transactional(readOnly = true)
     public List<Member> getMemberList() {
         return memberRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Member getMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found"));
     }
 
+    @Transactional
     public UpdateMemberResponse updateSelectivelyMember(Long id, String email, Boolean resetPassword, Role authority) {
+        // getMemberById는 readOnly=true이나, 이미 활성화된 Transaction(readOnly=false)에 참여하는 형태
         Member member = getMemberById(id);
         checkValidMemberUpdate(email, member.getId());
         String rawPassword = null;
@@ -66,6 +71,7 @@ public class MemberService {
         return new UpdateMemberResponse(member, rawPassword);
     }
 
+    @Transactional
     public void deleteMember(Long id) {
         if (!memberRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found");
@@ -73,6 +79,7 @@ public class MemberService {
         memberRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public AuthenticatedMember getAuthenticationFromToken(String token) {
         if (token == null || !jwtTokenProvider.validateToken(token)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
@@ -91,6 +98,7 @@ public class MemberService {
         }
     }
 
+    // 호출 메소드의 Transaction에 참여
     private boolean isEmailUsable(String email, Long memberId) {
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
         // 해당 이메일을 사용중인 멤버가 없거나, 이를 요청한 회원이 해당 이메일의 소유자일 경우 (즉, 이메일 변경이 아님)
@@ -105,11 +113,5 @@ public class MemberService {
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }
         return sb.toString();
-    }
-
-    private void throwNotFoundIfTrue(boolean condition) {
-        if (condition) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
     }
 }

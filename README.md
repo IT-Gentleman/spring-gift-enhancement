@@ -43,9 +43,9 @@
     - `removeOO` 메소드를 `deleteOO`로 변경
     - 반환타입을 일괄 void형으로 변경
 - Service 클래스
-  - [ ] Service 레이어의 `@Transactional` 어노테이션의 사용위치 변경
+  - [x] Service 레이어의 `@Transactional` 어노테이션의 사용위치 변경
     - 기존 클래스 단으로 적용하던 `@Transactional` 어노테이션을 메소드별로 변경
-  - [ ] Service 레이어의 `throwNotFoundException` 메소드 삭제
+  - [x] Service 레이어의 `throwNotFoundException` 메소드 삭제
     - MemberService, ProductService 클래스에 해당
   - [x] Service 레이어의 `deleteOO` 메소드 호출부 변경
     - hard delete 사용되는 MemberService, WishService 클래스에 해당
