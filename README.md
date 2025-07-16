@@ -37,7 +37,7 @@
     - `UpdateMemberResponse`로 이름 변경 : Dto의 이름은 Request와 Response로 통일
     - `Optional` 타입의 `temporalPassword` 필드를 `String` 타입으로 변경 : Optional 타입은 필드 / 매개변수 / 컬렉션 원소타입으로 사용하지 않도록 조치
 - Repository 클래스
-  - [ ] ProductRepository 인터페이스 리펙터링
+  - [x] ProductRepository 인터페이스 리펙터링
     - `findAllByDeletedIsFalseAndValidated` 메소드의 매개변수명을 `visibility`에서 컬럼명인 `validated`로 변경
   - [x] Repository 레이어의 삭제 메소드 리펙터링
     - `removeOO` 메소드를 `deleteOO`로 변경
