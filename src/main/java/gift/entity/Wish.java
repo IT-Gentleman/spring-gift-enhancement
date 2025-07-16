@@ -5,33 +5,32 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "wish")
-public class WishItem {
+public class Wish {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
-    Member member;
+    private Member member;
 
     @OneToOne
     @JoinColumn(name = "product_id", nullable = false)
-    Product product;
+    private Product product;
 
     @Column(name = "added_at", nullable = false)
-    LocalDateTime addedAt;
+    private LocalDateTime addedAt;
 
-    protected WishItem() {}
+    protected Wish() {}
 
-    public WishItem(Long id, Member member, Product product, LocalDateTime addedAt) {
+    public Wish(Long id, Member member, Product product, LocalDateTime addedAt) {
         this.id = id;
         this.member = member;
         this.product = product;
         this.addedAt = addedAt;
     }
 
-    public WishItem(Long memberId, Product product) {
+    public Wish(Long memberId, Product product) {
         this.member = new Member(memberId, null, null, null);
         this.product = product;
         this.addedAt = LocalDateTime.now();

@@ -29,7 +29,7 @@
   - [x] Member 테이블의 컬럼명 변경
     - `@Id` 어노테이션을 사용하는 `IdentifyNumber(identify_number)` 컬럼의 이름을 `id`로 변경
     - `Role` enum 타입의 `authority` 컬럼의 이름을 `role`로 변경
-  - [ ] Wish 테이블(기존 WishItem 클래스) 리펙터링
+  - [x] Wish 테이블(기존 WishItem 클래스) 리펙터링
     - 클래스명을 `Wish`로 변경 : 테이블명인 `wish`와 클래스명인 `WishItem`의 불일치 해결 목적
     - 접근제어자 추가 : `default`(미기재)에서 `private`로 변경하여 외부에서 접근 불가하도록 조치
 - Dto 클래스

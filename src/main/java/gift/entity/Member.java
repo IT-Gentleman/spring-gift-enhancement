@@ -22,7 +22,7 @@ public class Member {
     private Role role;
 
     @OneToMany(mappedBy = "member")
-    private List<WishItem> wishlist;
+    private List<Wish> wishList;
 
     protected Member() {}
 

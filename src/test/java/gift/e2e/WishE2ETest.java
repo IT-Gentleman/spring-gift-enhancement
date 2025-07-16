@@ -5,7 +5,7 @@ import gift.dto.WishItemResponse;
 import gift.entity.Member;
 import gift.entity.Product;
 import gift.entity.Role;
-import gift.entity.WishItem;
+import gift.entity.Wish;
 import gift.repository.MemberRepository;
 import gift.repository.ProductRepository;
 import gift.repository.WishRepository;
@@ -74,7 +74,7 @@ public class WishE2ETest {
         @Test
         @DisplayName("GET /api/wishes - 위시리스트 조회 시 200 OK")
         void 위시리스트_조회_시_200_OK() {
-            wishRepository.save(new WishItem(savedUser.getId(), savedProduct1));
+            wishRepository.save(new Wish(savedUser.getId(), savedProduct1));
 
             ResponseEntity<List<WishItemResponse>> response = restClient.get()
                     .uri(url)
@@ -95,7 +95,7 @@ public class WishE2ETest {
                     .isThrownBy(() -> restClient.get()
                             .uri(url)
                             .retrieve()
-                            .toEntity(new ParameterizedTypeReference<List<WishItem>>() {}));
+                            .toEntity(new ParameterizedTypeReference<List<Wish>>() {}));
         }
     }
 
@@ -138,7 +138,7 @@ public class WishE2ETest {
         @DisplayName("POST /api/wishes - 이미 존재하는 아이템 추가 시 409 CONFLICT")
         void 이미_존재하는_아이템_추가_시_409_CONFLICT() {
             // 첫 번째 추가
-            wishRepository.save(new WishItem(savedUser.getId(), savedProduct1));
+            wishRepository.save(new Wish(savedUser.getId(), savedProduct1));
             AddWishItemRequest request = new AddWishItemRequest(savedProduct1.getId());
 
             // 두 번째 추가 시도
@@ -158,7 +158,7 @@ public class WishE2ETest {
                     .isThrownBy(() -> restClient.get()
                             .uri(url)
                             .retrieve()
-                            .toEntity(new ParameterizedTypeReference<List<WishItem>>() {}));
+                            .toEntity(new ParameterizedTypeReference<List<Wish>>() {}));
         }
     }
 
@@ -170,10 +170,10 @@ public class WishE2ETest {
         @Test
         @DisplayName("DELETE /api/wishes/{wishItemId} - 유효한 아이템 삭제 시 204 NO_CONTENT")
         void 유효한_아이템_삭제_시_204_NO_CONTENT() {
-            WishItem wishItem = wishRepository.save(new WishItem(savedUser.getId(), savedProduct1));
+            Wish wish = wishRepository.save(new Wish(savedUser.getId(), savedProduct1));
 
             ResponseEntity<Void> response = restClient.delete()
-                    .uri(url + "/" + wishItem.getId())
+                    .uri(url + "/" + wish.getId())
                     .header("Authorization", "Bearer " + userToken)
                     .retrieve()
                     .toEntity(Void.class);
@@ -196,12 +196,12 @@ public class WishE2ETest {
         @DisplayName("DELETE /api/wishes/{wishItemId} - 다른 사용자의 아이템 삭제 시 404 NOT_FOUND")
         void 다른_사용자의_아이템_삭제_시_404_NOT_FOUND() {
             Member otherUser = memberRepository.save(new Member(null, "", "", Role.ROLE_USER));
-            WishItem otherUsersWishItem = wishRepository.save(new WishItem(otherUser.getId(), savedProduct1));
+            Wish otherUsersWish = wishRepository.save(new Wish(otherUser.getId(), savedProduct1));
 
 
             assertThatExceptionOfType(HttpClientErrorException.NotFound.class)
                     .isThrownBy(() -> restClient.delete()
-                            .uri(url + "/" + otherUsersWishItem.getId())
+                            .uri(url + "/" + otherUsersWish.getId())
                             .header("Authorization", "Bearer " + userToken)
                             .retrieve()
                             .toEntity(Void.class));
@@ -214,7 +214,7 @@ public class WishE2ETest {
                     .isThrownBy(() -> restClient.get()
                             .uri(url)
                             .retrieve()
-                            .toEntity(new ParameterizedTypeReference<List<WishItem>>() {}));
+                            .toEntity(new ParameterizedTypeReference<List<Wish>>() {}));
         }
     }
 }

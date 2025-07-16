@@ -3,8 +3,7 @@ package gift.controller;
 import gift.dto.AddWishItemRequest;
 import gift.dto.AuthenticatedMember;
 import gift.dto.WishItemResponse;
-import gift.entity.Member;
-import gift.entity.WishItem;
+import gift.entity.Wish;
 import gift.service.WishService;
 import gift.validator.LoginMember;
 import jakarta.validation.Valid;
@@ -41,7 +40,7 @@ public class WishController {
         @LoginMember AuthenticatedMember member,
         @RequestBody @Valid AddWishItemRequest request
     ) {
-        WishItem created = wishService.addWishItem(member.id(), request.productId());
+        Wish created = wishService.addWishItem(member.id(), request.productId());
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .header("Location", "/api/wish/" + created.getId())
