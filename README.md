@@ -50,7 +50,7 @@
   - [x] Service 레이어의 `deleteOO` 메소드 호출부 변경
     - hard delete 사용되는 MemberService, WishService 클래스에 해당
     - `deleteOO` 메소드가 void 타입으로 변경됨에 따라, 해당 메소드 호출부 이전에 `findOO` 메소드로 조회 후, 해당 객체가 존재하는지 여부를 확인하는 로직 추가
-  - [ ] MemberService 클래스의 `generateRandomPassword` 메소드 위치 변경
+  - [x] MemberService 클래스의 `generateRandomPassword` 메소드 위치 변경
     - 별도 utility 클래스로 분리하여 `PasswordUtils` 클래스에 위치
 #### [fix]
 - [ ] Wish 테이블 수정

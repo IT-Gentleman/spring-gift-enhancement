@@ -8,6 +8,7 @@ import gift.exception.InvalidCredentialsException;
 import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
 import gift.util.BCryptEncryptor;
+import gift.util.PasswordUtility;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,7 +65,7 @@ public class MemberService {
         String rawPassword = null;
         String encodedPassword = null;
         if (resetPassword) {
-            rawPassword = generateRandomPassword(10);
+            rawPassword = PasswordUtility.generateRandomPassword(15);
             encodedPassword = BCryptEncryptor.encrypt(rawPassword);
         }
         member.applyPatch(email, encodedPassword, authority);
@@ -103,15 +104,5 @@ public class MemberService {
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
         // 해당 이메일을 사용중인 멤버가 없거나, 이를 요청한 회원이 해당 이메일의 소유자일 경우 (즉, 이메일 변경이 아님)
         return optionalMember.isEmpty() || optionalMember.get().getId().equals(memberId);
-    }
-
-    private String generateRandomPassword(int length) {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-        StringBuilder sb = new StringBuilder();
-        java.security.SecureRandom random = new java.security.SecureRandom();
-        for (int i = 0; i < length; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
-        }
-        return sb.toString();
     }
 }
