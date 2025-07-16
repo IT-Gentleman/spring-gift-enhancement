@@ -3,7 +3,7 @@ package gift.controller;
 import gift.dto.CreateMemberRequest;
 import gift.dto.MemberResponse;
 import gift.dto.UpdateMemberRequest;
-import gift.dto.UpdateMemberResult;
+import gift.dto.UpdateMemberResponse;
 import gift.entity.Member;
 import gift.service.MemberService;
 import jakarta.validation.Valid;
@@ -93,16 +93,17 @@ public class MemberAdminPageController {
             model.addAttribute("message", "Invalid input. Check again.\n" + errorMessages);
             return "admin/member-form";
         }
-        UpdateMemberResult updatedMemberResult = memberService.updateSelectivelyMember(
+        UpdateMemberResponse updatedMemberResult = memberService.updateSelectivelyMember(
                 identifyNumber,
                 request.email(),
                 request.resetPassword(),
                 request.authority()
         );
         model.addAttribute("member", UpdateMemberRequest.from(updatedMemberResult.member()));
-        String temporalPasswordInstruction = updatedMemberResult.temporalPassword()
-                .map(password -> "\nTemporary password: " + password)
-                .orElse("");
+        String temporalPassword = updatedMemberResult.temporalPassword();
+        String temporalPasswordInstruction = temporalPassword != null && !temporalPassword.isEmpty()
+                ? "\nTemporary password: " + temporalPassword
+                : "";
         redirectAttributes.addFlashAttribute("message", "Member updated successfully." + temporalPasswordInstruction);
         return "redirect:/admin/members/" + identifyNumber;
     }

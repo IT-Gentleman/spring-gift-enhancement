@@ -1,7 +1,7 @@
 package gift.service;
 
 import gift.dto.AuthenticatedMember;
-import gift.dto.UpdateMemberResult;
+import gift.dto.UpdateMemberResponse;
 import gift.entity.Member;
 import gift.entity.Role;
 import gift.exception.InvalidCredentialsException;
@@ -53,7 +53,7 @@ public class MemberService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found"));
     }
 
-    public UpdateMemberResult updateSelectivelyMember(Long id, String email, Boolean resetPassword, Role authority) {
+    public UpdateMemberResponse updateSelectivelyMember(Long id, String email, Boolean resetPassword, Role authority) {
         Member member = getMemberById(id);
         checkValidMemberUpdate(email, member.getId());
         String rawPassword = null;
@@ -63,7 +63,7 @@ public class MemberService {
             encodedPassword = BCryptEncryptor.encrypt(rawPassword);
         }
         member.applyPatch(email, encodedPassword, authority);
-        return new UpdateMemberResult(member, Optional.ofNullable(rawPassword));
+        return new UpdateMemberResponse(member, rawPassword);
     }
 
     public void deleteMember(Long id) {

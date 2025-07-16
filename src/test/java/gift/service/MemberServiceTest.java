@@ -1,6 +1,6 @@
 package gift.service;
 
-import gift.dto.UpdateMemberResult;
+import gift.dto.UpdateMemberResponse;
 import gift.entity.Member;
 import gift.entity.Role;
 import gift.exception.InvalidCredentialsException;
@@ -157,14 +157,14 @@ class MemberServiceTest {
             when(memberRepository.findById(id)).thenReturn(Optional.of(existingMember));
             when(memberRepository.findByEmail(newEmail)).thenReturn(Optional.empty());
 
-            UpdateMemberResult result = memberService.updateSelectivelyMember(id, newEmail, false, newRole);
+            UpdateMemberResponse result = memberService.updateSelectivelyMember(id, newEmail, false, newRole);
 
             assertAll(
                     () -> assertThat(result.member().getId()).isEqualTo(id),
                     () -> assertThat(result.member().getEmail()).isEqualTo(newEmail),
                     () -> assertThat(result.member().getPassword()).isEqualTo(hashedPassword),
                     () -> assertThat(result.member().getRole()).isEqualTo(newRole),
-                    () -> assertThat(result.temporalPassword()).isEmpty()
+                    () -> assertThat(result.temporalPassword()).isNull()
             );
         }
 
@@ -186,14 +186,14 @@ class MemberServiceTest {
             try (MockedStatic<BCryptEncryptor> encryptor = mockStatic(BCryptEncryptor.class)) {
                 encryptor.when(() -> BCryptEncryptor.encrypt(any())).thenReturn(newPassword);
 
-                UpdateMemberResult result = memberService.updateSelectivelyMember(id, newEmail, true, newRole);
+                UpdateMemberResponse result = memberService.updateSelectivelyMember(id, newEmail, true, newRole);
 
                 assertAll(
                         () -> assertThat(result.member().getId()).isEqualTo(id),
                         () -> assertThat(result.member().getEmail()).isEqualTo(newEmail),
                         () -> assertThat(result.member().getPassword()).isEqualTo(newPassword),
                         () -> assertThat(result.member().getRole()).isEqualTo(newRole),
-                        () -> assertThat(result.temporalPassword()).isNotEmpty()
+                        () -> assertThat(result.temporalPassword()).isNotNull()
                 );
             }
         }

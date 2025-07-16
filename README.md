@@ -33,7 +33,7 @@
     - 클래스명을 `Wish`로 변경 : 테이블명인 `wish`와 클래스명인 `WishItem`의 불일치 해결 목적
     - 접근제어자 추가 : `default`(미기재)에서 `private`로 변경하여 외부에서 접근 불가하도록 조치
 - Dto 클래스
-  - [ ] `UpdateMemberResult` Dto 리팩터링
+  - [x] `UpdateMemberResult` Dto 리팩터링
     - `UpdateMemberResponse`로 이름 변경 : Dto의 이름은 Request와 Response로 통일
     - `Optional` 타입의 `temporalPassword` 필드를 `String` 타입으로 변경 : Optional 타입은 필드 / 매개변수 / 컬렉션 원소타입으로 사용하지 않도록 조치
 - Repository 클래스
