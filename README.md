@@ -25,7 +25,7 @@
 ### before step2 implementation
 #### [refactor]
 - Entity 클래스
-  - [ ] 엔티티(`Member`, `Product`, `Wish`)의 id setter 제거
+  - [x] 엔티티(`Member`, `Product`, `Wish`)의 id setter 제거
   - [ ] Member 테이블의 컬럼명 변경
     - `@Id` 어노테이션을 사용하는 `IdentifyNumber(identify_number)` 컬럼의 이름을 `id`로 변경
     - `Role` enum 타입의 `authority` 컬럼의 이름을 `role`로 변경

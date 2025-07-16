@@ -39,10 +39,6 @@ public class Member {
         this(null, email, password, Role.ROLE_USER);
     }
 
-    public void setIdentifyNumber(Long identifyNumber) {
-        this.identifyNumber = identifyNumber;
-    }
-
     public Long getIdentifyNumber() {
         return identifyNumber;
     }
