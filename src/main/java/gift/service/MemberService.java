@@ -4,17 +4,20 @@ import gift.dto.AuthenticatedMember;
 import gift.dto.UpdateMemberResponse;
 import gift.entity.Member;
 import gift.entity.Role;
+import gift.exception.ConflictException;
 import gift.exception.InvalidCredentialsException;
+import gift.exception.NotFoundException;
 import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
 import gift.util.BCryptEncryptor;
 import gift.util.PasswordUtility;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -47,14 +50,14 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<Member> getMemberList() {
-        return memberRepository.findAll();
+    public Page<Member> getMemberList(Pageable pageable) {
+        return memberRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
     public Member getMemberById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found"));
+                .orElseThrow(() -> new NotFoundException("Member not found"));
     }
 
     @Transactional
@@ -75,7 +78,7 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long id) {
         if (!memberRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found");
+            throw new NotFoundException("Member not found");
         }
         memberRepository.deleteById(id);
     }
@@ -95,7 +98,7 @@ public class MemberService {
 
     private void checkValidMemberUpdate(String email, Long memberId) {
         if (!isEmailUsable(email, memberId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
+            throw new ConflictException("Email already in use");
         }
     }
 

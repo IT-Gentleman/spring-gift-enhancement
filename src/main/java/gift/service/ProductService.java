@@ -1,13 +1,15 @@
 package gift.service;
 
 import gift.entity.Product;
+import gift.exception.NotFoundException;
 import gift.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,7 +32,7 @@ public class ProductService {
     public Product getProductById(Long id) {
         Optional<Product> optionalProduct = productRepository.findByIdAndDeletedIsFalse(id);
         if (optionalProduct.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+            throw new NotFoundException("Product not found");
         }
         return optionalProduct.get();
     }
@@ -40,15 +42,15 @@ public class ProductService {
     public Product getProductWhetherDeletedById(Long id) {
         Optional<Product> optionalProduct = productRepository.findById(id);
         if (optionalProduct.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+            throw new NotFoundException("Product not found");
         }
         return optionalProduct.get();
     }
 
     // TODO : validated T/F로 나누지 말고, 위 처럼 whetherDeleted로 나누는 걸로 변경 (findAll 사용)
     @Transactional(readOnly = true)
-    public List<Product> getProductList(Boolean validated) {
-        return productRepository.findAllByDeletedIsFalseAndValidated(validated);
+    public Page<Product> getProductList(Boolean validated, Pageable pageable) {
+        return productRepository.findAllByDeletedIsFalseAndValidated(validated, pageable);
     }
 
     @Transactional

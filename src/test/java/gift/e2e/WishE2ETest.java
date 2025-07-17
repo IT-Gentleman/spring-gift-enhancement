@@ -20,8 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -76,7 +74,7 @@ public class WishE2ETest {
         void 위시리스트_조회_시_200_OK() {
             wishRepository.save(new Wish(savedUser, savedProduct1));
 
-            ResponseEntity<List<WishItemResponse>> response = restClient.get()
+            ResponseEntity<RestPage<WishItemResponse>> response = restClient.get()
                     .uri(url)
                     .header("Authorization", "Bearer " + userToken)
                     .retrieve()
@@ -84,8 +82,8 @@ public class WishE2ETest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
-            assertThat(response.getBody().size()).isEqualTo(1);
-            assertThat(response.getBody().get(0).productName()).isEqualTo("Product 1");
+            assertThat(response.getBody().getContent().size()).isEqualTo(1);
+            assertThat(response.getBody().getContent().get(0).productName()).isEqualTo("Product 1");
         }
 
         @Test
@@ -95,7 +93,7 @@ public class WishE2ETest {
                     .isThrownBy(() -> restClient.get()
                             .uri(url)
                             .retrieve()
-                            .toEntity(new ParameterizedTypeReference<List<Wish>>() {}));
+                            .toEntity(new ParameterizedTypeReference<RestPage<Wish>>() {}));
         }
     }
 
@@ -158,7 +156,7 @@ public class WishE2ETest {
                     .isThrownBy(() -> restClient.get()
                             .uri(url)
                             .retrieve()
-                            .toEntity(new ParameterizedTypeReference<List<Wish>>() {}));
+                            .toEntity(new ParameterizedTypeReference<RestPage<Wish>>() {}));
         }
     }
 
@@ -214,7 +212,7 @@ public class WishE2ETest {
                     .isThrownBy(() -> restClient.get()
                             .uri(url)
                             .retrieve()
-                            .toEntity(new ParameterizedTypeReference<List<Wish>>() {}));
+                            .toEntity(new ParameterizedTypeReference<RestPage<Wish>>() {}));
         }
     }
 }

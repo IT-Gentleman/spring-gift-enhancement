@@ -3,13 +3,14 @@ package gift.service;
 import gift.entity.Member;
 import gift.entity.Product;
 import gift.entity.Wish;
+import gift.exception.ConflictException;
 import gift.repository.WishRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @Service
 public class WishService {
@@ -23,8 +24,8 @@ public class WishService {
     }
 
     @Transactional(readOnly = true)
-    public List<Wish> getWishListByMemberId(Long memberId) {
-        return wishRepository.findAllByMemberId(memberId);
+    public Page<Wish> getWishListByMemberId(Long memberId, Pageable pageable) {
+        return wishRepository.findAllByMemberId(memberId, pageable);
     }
 
     @Transactional
@@ -33,7 +34,7 @@ public class WishService {
         Product product = productService.getProductById(productId);
 
         if (wishRepository.existsByMemberIdAndProductId(memberId, productId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Wish already exists for this product");
+            throw new ConflictException("Wish already exists for this product");
         }
         Wish wish = new Wish(Member.emptyOfId(memberId), product);
         return wishRepository.save(wish);

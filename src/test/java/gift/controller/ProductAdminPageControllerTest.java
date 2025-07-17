@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,6 +31,7 @@ class ProductAdminPageControllerTest {
 
     @Test
     void 상품목록_조회_시_상품목록페이지() throws Exception {
+        when(productService.getProductList(any(), any())).thenReturn(Page.empty());
         mockMvc.perform(get("/admin/products"))
             .andExpect(view().name("admin/product-list"))
             .andExpect(model().attributeExists("products"));

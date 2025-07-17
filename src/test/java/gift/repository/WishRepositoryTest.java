@@ -8,6 +8,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -113,20 +114,20 @@ class WishRepositoryTest {
             );
             wishRepository.save(wish);
 
-            List<Wish> wishes = wishRepository.findAllByMemberId(existingMember.getId());
+            Page<Wish> wishes = wishRepository.findAllByMemberId(existingMember.getId(), null);
             assertAll(
-                () -> assertThat(wishes).hasSize(1),
-                () -> assertThat(wishes.get(0).getId()).isNotNull(),
-                () -> assertThat(wishes.get(0).getMember().getId()).isEqualTo(existingMember.getId()),
-                () -> assertThat(wishes.get(0).getProduct().getId()).isEqualTo(existingProduct.getId())
+                () -> assertThat(wishes.getContent()).hasSize(1),
+                () -> assertThat(wishes.getContent().get(0).getId()).isNotNull(),
+                () -> assertThat(wishes.getContent().get(0).getMember().getId()).isEqualTo(existingMember.getId()),
+                () -> assertThat(wishes.getContent().get(0).getProduct().getId()).isEqualTo(existingProduct.getId())
             );
         }
 
         @Test
         @DisplayName("존재하지 않는 memberId로 위시 아이템 조회 시 빈 리스트 반환")
         void 존재하지_않는_memberId로_위시_아이템_조회_시_빈_리스트_반환() {
-            List<Wish> wishes = wishRepository.findAllByMemberId(999L);
-            assertThat(wishes).hasSize(0);
+            Page<Wish> wishes = wishRepository.findAllByMemberId(999L, null);
+            assertThat(wishes.getContent()).hasSize(0);
         }
     }
 

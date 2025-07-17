@@ -7,13 +7,15 @@ import gift.dto.UpdateMemberResponse;
 import gift.entity.Member;
 import gift.service.MemberService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
@@ -27,11 +29,12 @@ public class MemberAdminPageController {
     }
 
     @GetMapping
-    public String getMembers(Model model) {
-        List<Member> memberList = memberService.getMemberList();
-        List<MemberResponse> response = memberList.stream()
-                .map(member -> MemberResponse.from(member))
-                .toList();
+    public String getMembers(
+        Pageable pageable,
+        Model model
+    ) {
+        Page<Member> memberList = memberService.getMemberList(pageable);
+        Page<MemberResponse> response = memberList.map(MemberResponse::from);
         model.addAttribute("members", response);
         return "admin/member-list";
     }
@@ -45,10 +48,10 @@ public class MemberAdminPageController {
 
     @PostMapping
     public String createMember(
-            @Valid @ModelAttribute CreateMemberRequest request,
-            BindingResult bindingResult,
-            Model model,
-            RedirectAttributes redirectAttributes
+        @Valid @ModelAttribute CreateMemberRequest request,
+        BindingResult bindingResult,
+        Model model,
+        RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("memberId", null);
@@ -67,8 +70,8 @@ public class MemberAdminPageController {
 
     @GetMapping("/{id}")
     public String getMember(
-            @PathVariable("id") Long identifyNumber,
-            Model model
+        @PathVariable("id") Long identifyNumber,
+        Model model
     ) {
         Member member = memberService.getMemberById(identifyNumber);
         model.addAttribute("member", UpdateMemberRequest.from(member));
@@ -78,11 +81,11 @@ public class MemberAdminPageController {
 
     @PutMapping("/{id}")
     public String updateMember(
-            @PathVariable("id") Long identifyNumber,
-            @Valid @ModelAttribute UpdateMemberRequest request,
-            BindingResult bindingResult,
-            Model model,
-            RedirectAttributes redirectAttributes
+        @PathVariable("id") Long identifyNumber,
+        @Valid @ModelAttribute UpdateMemberRequest request,
+        BindingResult bindingResult,
+        Model model,
+        RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("memberId", identifyNumber);
@@ -97,7 +100,7 @@ public class MemberAdminPageController {
                 identifyNumber,
                 request.email(),
                 request.resetPassword(),
-                request.authority()
+                request.role()
         );
         model.addAttribute("member", UpdateMemberRequest.from(updatedMemberResult.member()));
         String temporalPassword = updatedMemberResult.temporalPassword();
@@ -110,8 +113,8 @@ public class MemberAdminPageController {
 
     @DeleteMapping("/{id}")
     public String deleteMember(
-            @PathVariable("id") Long identifyNumber,
-            RedirectAttributes redirectAttributes
+        @PathVariable("id") Long identifyNumber,
+        RedirectAttributes redirectAttributes
     ) {
         memberService.deleteMember(identifyNumber);
         redirectAttributes.addFlashAttribute("message", "Member deleted successfully.");

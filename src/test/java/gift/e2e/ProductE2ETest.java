@@ -8,6 +8,7 @@ import gift.entity.Role;
 import gift.repository.MemberRepository;
 import gift.repository.ProductRepository;
 import gift.token.JwtTokenProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,11 +19,8 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.junit.jupiter.api.AfterEach;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
-
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
@@ -190,15 +188,15 @@ public class ProductE2ETest {
     @DisplayName("GET /api/products - 리스트 조회 시 200 OK")
     void 리스트_조회_시_200_OK() {
         String url = baseUrl + port + "/api/products";
-        ResponseEntity<List<Product>> response = restClient.get()
+        ResponseEntity<RestPage<Product>> response = restClient.get()
                 .uri(url)
                 .header("Authorization", "Bearer " + mdToken)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<List<Product>>() {});
+                .toEntity(new ParameterizedTypeReference<RestPage<Product>>() {});
 
         assertAll(
                 () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
-                () -> assertThat(response.getBody().size()).isNotZero()
+                () -> assertThat(response.getBody().getContent().size()).isNotZero()
         );
     }
 
