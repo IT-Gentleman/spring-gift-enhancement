@@ -1,6 +1,7 @@
 package gift.service;
 
 import gift.entity.Product;
+import gift.exception.NotFoundException;
 import gift.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -60,7 +61,7 @@ class ProductServiceTest {
             Long productId = 999L;
             when(productRepository.findByIdAndDeletedIsFalse(productId)).thenReturn(Optional.empty());
 
-            assertThrows(ResponseStatusException.class, () -> productService.getProductById(productId));
+            assertThrows(NotFoundException.class, () -> productService.getProductById(productId));
         }
     }
 
@@ -84,7 +85,7 @@ class ProductServiceTest {
             Long productId = 999L;
             when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-            assertThrows(ResponseStatusException.class, () -> productService.getProductWhetherDeletedById(productId));
+            assertThrows(NotFoundException.class, () -> productService.getProductWhetherDeletedById(productId));
         }
     }
 

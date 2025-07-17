@@ -58,6 +58,10 @@ public class Member {
         return email;
     }
 
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public Role getRole() {
         return role;
     }

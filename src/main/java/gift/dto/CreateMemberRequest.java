@@ -16,7 +16,7 @@ public record CreateMemberRequest (
         String password,
 
         @NotNull(message = "권한은 제시되어야합니다.")
-        Role authority
+        Role role
 ) {
     public static CreateMemberRequest empty() {
         return new CreateMemberRequest("", "", Role.ROLE_USER);

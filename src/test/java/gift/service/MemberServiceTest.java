@@ -3,6 +3,7 @@ package gift.service;
 import gift.dto.UpdateMemberResponse;
 import gift.entity.Member;
 import gift.entity.Role;
+import gift.exception.ConflictException;
 import gift.exception.InvalidCredentialsException;
 import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
@@ -78,7 +79,7 @@ class MemberServiceTest {
 
             when(memberRepository.findByEmail(email)).thenReturn(Optional.of(new Member(100L, email, "hashedPassword", null)));
 
-            assertThrows(ResponseStatusException.class, () -> memberService.createMember(email, rawPassword));
+            assertThrows(ConflictException.class, () -> memberService.createMember(email, rawPassword));
         }
     }
 
