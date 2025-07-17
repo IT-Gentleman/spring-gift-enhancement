@@ -56,6 +56,14 @@
 #### [fix]
 - [x] Wish 테이블 수정
   - Product와의 연관관계 매핑 변경 : `@OneToOne`에서 `@ManyToOne` 어노테이션으로 변경하여, 여러명(여러 Wish)이 하나의 Product를 참조할 수 있도록 조치
+### Step2 implementation
+- [ ] 페이징 구현
+  - API, Admin Page(Thymeleaf)에서 페이징 기능 구현
+  - Admin Page 페이징 UI 구현 (assisted by AI, implemented by bootstrap)
+### after step2 implementation
+- [ ] Admin Page 전역 UI 개선 (assisted by AI, implemented by bootstrap)
+- [ ] Admin Page 예외페이지 정상작동 구현
+  - Custom Exception 및 Custom Exception Handler 구현
 
 ## TODO
 ### Whenever is ready
