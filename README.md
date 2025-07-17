@@ -61,7 +61,7 @@
   - API, Admin Page(Thymeleaf)에서 페이징 기능 구현
   - Admin Page 페이징 UI 구현 (assisted by AI, implemented by bootstrap)
 ### after step2 implementation
-- [ ] Admin Page 전역 UI 개선 (assisted by AI, implemented by bootstrap)
+- [x] Admin Page 전역 UI 개선 (assisted by AI, implemented by bootstrap)
 - [ ] Admin Page 예외페이지 정상작동 구현
   - Custom Exception 및 Custom Exception Handler 구현
 
