@@ -1,22 +1,21 @@
 package gift.handler;
 
-import com.sun.jdi.request.DuplicateRequestException;
 import gift.dto.ErrorResponse;
 import gift.exception.ConflictException;
 import gift.exception.InvalidCredentialsException;
 import gift.exception.NotFoundException;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class GlobalRestControllerExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

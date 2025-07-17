@@ -4,12 +4,16 @@ import gift.controller.MemberAdminPageController;
 import gift.exception.ConflictException;
 import gift.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.annotation.Order;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice(assignableTypes = MemberAdminPageController.class)
+@Order(1)
 public class MemberAdminPageControllerExceptionHandler {
+
+    private final String mainPage = "/admin/members";
 
     @ExceptionHandler(NotFoundException.class)
     public String handleNotFoundException(NotFoundException ex, Model model, HttpServletRequest request) {
@@ -17,6 +21,7 @@ public class MemberAdminPageControllerExceptionHandler {
         model.addAttribute("errorMessage", errorMessage);
         String referer = request.getHeader("Referer");
         model.addAttribute("prevPage", referer);
+        model.addAttribute("mainPage", mainPage);
         return "error/custom-error";
     }
 
@@ -26,6 +31,7 @@ public class MemberAdminPageControllerExceptionHandler {
         model.addAttribute("errorMessage", errorMessage);
         String referer = request.getHeader("Referer");
         model.addAttribute("prevPage", referer);
+        model.addAttribute("mainPage", mainPage);
         return "error/custom-error";
     }
 }
