@@ -1,9 +1,6 @@
 package gift.controller;
 
-import gift.dto.CreateMemberRequest;
-import gift.dto.MemberResponse;
-import gift.dto.UpdateMemberRequest;
-import gift.dto.UpdateMemberResponse;
+import gift.dto.*;
 import gift.entity.Member;
 import gift.service.MemberService;
 import jakarta.validation.Valid;
@@ -35,7 +32,7 @@ public class MemberAdminPageController {
     ) {
         Page<Member> memberList = memberService.getMemberList(pageable);
         Page<MemberResponse> response = memberList.map(MemberResponse::from);
-        model.addAttribute("members", response);
+        model.addAttribute("members", PageResponse.from(response));
         return "admin/member-list";
     }
 

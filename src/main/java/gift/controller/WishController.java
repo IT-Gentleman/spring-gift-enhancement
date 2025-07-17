@@ -2,6 +2,7 @@ package gift.controller;
 
 import gift.dto.AddWishItemRequest;
 import gift.dto.AuthenticatedMember;
+import gift.dto.PageResponse;
 import gift.dto.WishItemResponse;
 import gift.entity.Wish;
 import gift.service.WishService;
@@ -24,15 +25,17 @@ public class WishController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<WishItemResponse>> getWishList(
+    public ResponseEntity<PageResponse<WishItemResponse>> getWishList(
         @LoginMember AuthenticatedMember member,
         Pageable pageable
     ) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(
-                wishService.getWishListByMemberId(member.id(), pageable)
-                    .map(WishItemResponse::from)
+                PageResponse.from(
+                    wishService.getWishListByMemberId(member.id(), pageable)
+                        .map(WishItemResponse::from)
+                )
             );
     }
 

@@ -1,6 +1,7 @@
 package gift.controller;
 
 import gift.dto.CreateProductRequest;
+import gift.dto.PageResponse;
 import gift.dto.PatchProductRequest;
 import gift.dto.ProductResponse;
 import gift.entity.Product;
@@ -48,12 +49,12 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductResponse>> getAllProducts(Pageable pageable) {
+    public ResponseEntity<PageResponse<ProductResponse>> getAllProducts(Pageable pageable) {
         Page<Product> products = productService.getProductList(true, pageable);
         Page<ProductResponse> response = products.map(ProductResponse::from);
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(response);
+            .body(PageResponse.from(response));
     }
 
     @PatchMapping("/{id}")

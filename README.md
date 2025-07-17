@@ -61,9 +61,14 @@
   - API, Admin Page(Thymeleaf)에서 페이징 기능 구현
   - Admin Page 페이징 UI 구현 (assisted by AI, implemented by bootstrap)
 ### after step2 implementation
+#### [feat]
 - [x] Admin Page 전역 UI 개선 (assisted by AI, implemented by bootstrap)
+#### [fix]
 - [x] Admin Page 예외페이지 정상작동 구현
   - Custom Exception 및 Custom Exception Handler 구현
+#### [refactor]
+- [x] Page 반환방법을 Dto 사용하는 것으로 변경
+  - `Page` 객체를 직접 반환하는 대신, `PageResponse` Dto로 변환하여 반환
 
 ## TODO
 ### Whenever is ready

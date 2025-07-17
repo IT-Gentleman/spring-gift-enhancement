@@ -1,6 +1,7 @@
 package gift.e2e;
 
 import gift.dto.AddWishItemRequest;
+import gift.dto.PageResponse;
 import gift.dto.WishItemResponse;
 import gift.entity.Member;
 import gift.entity.Product;
@@ -74,7 +75,7 @@ public class WishE2ETest {
         void 위시리스트_조회_시_200_OK() {
             wishRepository.save(new Wish(savedUser, savedProduct1));
 
-            ResponseEntity<RestPage<WishItemResponse>> response = restClient.get()
+            ResponseEntity<PageResponse<WishItemResponse>> response = restClient.get()
                     .uri(url)
                     .header("Authorization", "Bearer " + userToken)
                     .retrieve()
@@ -82,8 +83,8 @@ public class WishE2ETest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
-            assertThat(response.getBody().getContent().size()).isEqualTo(1);
-            assertThat(response.getBody().getContent().get(0).productName()).isEqualTo("Product 1");
+            assertThat(response.getBody().content().size()).isEqualTo(1);
+            assertThat(response.getBody().content().get(0).productName()).isEqualTo("Product 1");
         }
 
         @Test
