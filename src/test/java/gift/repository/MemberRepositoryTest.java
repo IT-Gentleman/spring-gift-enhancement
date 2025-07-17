@@ -48,7 +48,7 @@ class MemberRepositoryTest {
             );
             Member savedMember = memberRepository.save(exampleMember);
             assertAll(
-                    () -> assertThat(savedMember.getIdentifyNumber()).isNotNull(),
+                    () -> assertThat(savedMember.getId()).isNotNull(),
                     () -> assertTrue(memberDetailsEquals(savedMember, exampleMember))
             );
         }
@@ -94,13 +94,13 @@ class MemberRepositoryTest {
         @Test
         @DisplayName("존재하는 멤버의 식별번호로 조회 시 멤버 반환")
         void 존재하는_멤버의_식별번호로_조회_시_멤버반환() {
-            assertThat(memberRepository.findByIdentifyNumber(existingMember.getIdentifyNumber())).isPresent();
+            assertThat(memberRepository.findById(existingMember.getId())).isPresent();
         }
 
         @Test
         @DisplayName("존재하지 않는 식별번호로 조회 시 빈 Optional 반환")
         void 존재하지_않는_식별번호로_조회_시_빈Optional반환() {
-            assertThat(memberRepository.findByIdentifyNumber(500L)).isEmpty();
+            assertThat(memberRepository.findById(500L)).isEmpty();
         }
     }
 
@@ -126,21 +126,25 @@ class MemberRepositoryTest {
     class deleteByIdentifyNumberTests {
 
         @Test
-        @DisplayName("존재하는 멤버의 식별번호로 삭제 시 true 반환")
-        void 존재하는_멤버의_식별번호로_삭제_시_true반환() {
-            assertThat(memberRepository.deleteByIdentifyNumber(existingMember.getIdentifyNumber())).isEqualTo(1);
+        @DisplayName("존재하는 멤버의 식별번호로 삭제 시 삭제")
+        void 존재하는_멤버의_식별번호로_삭제_시_삭제() {
+            assertThat(memberRepository.findById(existingMember.getId())).isPresent();
+            memberRepository.deleteById(existingMember.getId());
+            assertThat(memberRepository.findById(existingMember.getId())).isEmpty();
         }
 
         @Test
-        @DisplayName("존재하지 않는 식별번호로 삭제 시 false 반환")
-        void 존재하지_않는_식별번호로_삭제_시_false반환() {
-            assertThat(memberRepository.deleteByIdentifyNumber(500L)).isEqualTo(0);
+        @DisplayName("존재하지 않는 식별번호로 삭제 시 미삭제")
+        void 존재하지_않는_식별번호로_삭제_시_미삭제() {
+            assertThat(memberRepository.findById(existingMember.getId())).isPresent();
+            memberRepository.deleteById(500L);
+            assertThat(memberRepository.findById(existingMember.getId())).isPresent();
         }
     }
 
     private boolean memberDetailsEquals(Member member1, Member member2) {
         return member1.getEmail().equals(member2.getEmail())
             && member1.getPassword().equals(member2.getPassword())
-            && member1.getAuthority().equals(member2.getAuthority());
+            && member1.getRole().equals(member2.getRole());
     }
 }

@@ -2,17 +2,17 @@ package gift.controller;
 
 import gift.dto.AddWishItemRequest;
 import gift.dto.AuthenticatedMember;
+import gift.dto.PageResponse;
 import gift.dto.WishItemResponse;
-import gift.entity.Member;
-import gift.entity.WishItem;
+import gift.entity.Wish;
 import gift.service.WishService;
 import gift.validator.LoginMember;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/wishes")
@@ -25,14 +25,17 @@ public class WishController {
     }
 
     @GetMapping
-    public ResponseEntity<List<WishItemResponse>> getWishList(
-        @LoginMember AuthenticatedMember member
+    public ResponseEntity<PageResponse<WishItemResponse>> getWishList(
+        @LoginMember AuthenticatedMember member,
+        Pageable pageable
     ) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(
-                wishService.getWishListByMemberId(member.id())
-                    .stream().map(wishItem -> WishItemResponse.from(wishItem)).toList()
+                PageResponse.from(
+                    wishService.getWishListByMemberId(member.id(), pageable)
+                        .map(WishItemResponse::from)
+                )
             );
     }
 
@@ -41,7 +44,7 @@ public class WishController {
         @LoginMember AuthenticatedMember member,
         @RequestBody @Valid AddWishItemRequest request
     ) {
-        WishItem created = wishService.addWishItem(member.id(), request.productId());
+        Wish created = wishService.addWishItem(member.id(), request.productId());
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .header("Location", "/api/wish/" + created.getId())

@@ -29,17 +29,10 @@ public class Product {
     @Column(nullable = false)
     private Boolean deleted = false;
 
+    // non-argument constructor for JPA
     protected Product() {}
 
-    public Product(Long id, String name, Integer price, String imageUrl, Boolean validated) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.imageUrl = imageUrl;
-        this.validated = validated;
-    }
-
-    // this constructor is used only for the repository row mapper
+    // all arguments constructor for test code
     public Product(Long id, String name, Integer price, String imageUrl, Boolean validated, Boolean deleted) {
         this.id = id;
         this.name = name;
@@ -49,6 +42,7 @@ public class Product {
         this.deleted = deleted;
     }
 
+    // constructor for product creation. use as a factory method
     public Product(String name, Integer price, String imageUrl) {
         this.name = name;
         this.price = price;
@@ -56,32 +50,16 @@ public class Product {
         this.validated = checkValidatedByName(name);
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
-
     public Integer getPrice() {
         return price;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
     }
 
     public String getImageUrl() {

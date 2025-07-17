@@ -3,72 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>상품정보 작성</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 20px;
         }
-        a, button {
-            padding: 3px 6px;
-            border-radius: 4px;
-            text-decoration: none;
-            margin-right: 5px;
-            font-size: 14px;
-        }
-        button {
-            cursor: pointer;
-        }
-        a {
-            display: inline-block;
+        .container {
+            margin-top: 20px;
+            max-width: 600px;
         }
     </style>
 </head>
 <body>
-    <h1>상품정보 작성</h1>
-    <h2 th:if="${productId != null}" th:inline="text">- [[${productId}]]번 상품</h2>
-    <h2 th:if="${productId == null}">- 신규 상품</h2>
-    <h3 th:if="${productId != null and deleted}">❌상품이 삭제되어, 더이상 게시/수정할 수 없습니다. 현재 비공개 상태입니다.</h3>
-    <h3 th:if="${productId != null and !deleted}" th:text="${validated} ? '✅상품이 검증 완료되어, 현재 공개 상태입니다.' : '🛑상품명이 담당MD에 의해 검증되지 않은 상태입니다.'">안내문</h3>
-    <form th:if="${productId != null and !deleted}"
-          th:with="actionUrl='/admin/products/' + ${productId} + '?validated=' + ${!validated}"
-          th:action="@{${actionUrl}}"
-          method="post" style="display:inline">
+<div class="container">
+    <h1 class="mb-3">상품정보 작성</h1>
+    <h2 th:if="${productId != null}" class="h4" th:inline="text">- [[${productId}]]번 상품</h2>
+    <h2 th:if="${productId == null}" class="h4">- 신규 상품</h2>
+    <div th:if="${productId != null and deleted}" class="alert alert-danger">❌ 상품이 삭제되어, 더이상 게시/수정할 수 없습니다. 현재 비공개 상태입니다.</div>
+    <div th:if="${productId != null and !deleted}" th:class="${validated} ? 'alert alert-success' : 'alert alert-warning'" th:text="${validated} ? '✅상품이 검증 완료되어, 현재 공개 상태입니다.' : '🛑상품명이 담당MD에 의해 검증되지 않은 상태입니다.'"></div>
+
+    <form th:if="${productId != null and !deleted}" th:action="@{/admin/products/{id}(id=${productId}, validated=${!validated})}" method="post" style="display:inline">
         <input type="hidden" name="_method" value="patch" />
-        <button type="submit">Change Validated Status</button>
+        <button type="submit" class="btn btn-info mb-3">Change Validated Status</button>
     </form>
-    <form th:action="${productId == null} ? @{/admin/products} : @{/admin/products/{id}(id=${productId})}"
-          method="post"
-          th:object="${product}">
+
+    <form th:action="${productId == null} ? @{/admin/products} : @{/admin/products/{id}(id=${productId})}" method="post" th:object="${product}">
         <input type="hidden" name="_method" value="put" th:if="${productId != null}" />
-        <p>
-            <label>name:</label>
-            <input type="text" th:field="*{name}" />
-        </p>
-        <p>
-            <label>price:</label>
-            <input type="number" th:field="*{price}" />
-        </p>
-        <p>
-            <label>imageUrl:</label>
-            <input type="text" th:field="*{imageUrl}" />
-        </p>
-        <button type="submit" th:if="${productId == null}" >Create</button>
-        <button type="submit" th:if="${productId != null and !deleted}" >Apply Changes</button>
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" th:field="*{name}" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="price">Price:</label>
+            <input type="number" id="price" th:field="*{price}" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="imageUrl">Image URL:</label>
+            <input type="text" id="imageUrl" th:field="*{imageUrl}" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary" th:if="${productId == null}">Create</button>
+        <button type="submit" class="btn btn-primary" th:if="${productId != null and !deleted}">Apply Changes</button>
     </form>
-    <form th:if="${productId != null}"
-          th:action="@{/admin/products/{id}(id=${productId})}"
-          method="post" style="display:inline"
-          onsubmit="return confirm('Are you sure to delete?');">
-        <input type="hidden" name="_method" value="delete" />
-        <button type="submit">Delete</button>
-    </form>
-    <form action="/admin/products"
-          method="get" style="display:inline">
-        <button type="submit">Go to Product List</button>
-    </form>
-    <script th:if="${message}" th:inline="javascript">
-        /*<![CDATA[*/
-        alert([[${message}]]);
-        /*]]>*/
-    </script>
+
+    <div class="mt-3">
+        <form th:if="${productId != null}" th:action="@{/admin/products/{id}(id=${productId})}" method="post" style="display:inline" onsubmit="return confirm('Are you sure to delete?');">
+            <input type="hidden" name="_method" value="delete" />
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+        <a href="/admin/products" class="btn btn-secondary">Go to Product List</a>
+    </div>
+</div>
+<script th:if="${message}" th:inline="javascript">
+    /*<![CDATA[*/
+    alert([[${message}]]);
+    /*]]>*/
+</script>
 </body>
 </html>

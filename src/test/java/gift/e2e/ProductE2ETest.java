@@ -1,6 +1,8 @@
 package gift.e2e;
 
 import gift.dto.CreateProductRequest;
+import gift.dto.PageResponse;
+import gift.dto.ProductResponse;
 import gift.dto.UpdateProductRequest;
 import gift.entity.Member;
 import gift.entity.Product;
@@ -8,6 +10,7 @@ import gift.entity.Role;
 import gift.repository.MemberRepository;
 import gift.repository.ProductRepository;
 import gift.token.JwtTokenProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,11 +21,8 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.junit.jupiter.api.AfterEach;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
-
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
@@ -54,7 +54,7 @@ public class ProductE2ETest {
         restClient = RestClient.create();
         Member md = memberRepository.save(new Member(null, "md@example.com", "mdpassword123456789", Role.ROLE_MD));
         mdToken = jwtTokenProvider.createToken(md);
-        savedProduct = productRepository.save(new Product(null, "Initial Product", 10000, "initial.jpg", true));
+        savedProduct = productRepository.save(new Product(null, "Initial Product", 10000, "initial.jpg", true, false));
     }
 
     @AfterEach
@@ -76,15 +76,15 @@ public class ProductE2ETest {
                     4700,
                     "https://st.kakaocdn.net/product/gift/product/20231010111814_9a667f9eccc943648797925498bdd8a3.jpg"
             );
-            ResponseEntity<Product> response = restClient.post()
+            ResponseEntity<ProductResponse> response = restClient.post()
                     .uri(url)
                     .header("Authorization", "Bearer " + mdToken)
                     .body(requestDto)
                     .retrieve()
-                    .toEntity(Product.class);
+                    .toEntity(ProductResponse.class);
             assertAll(
                     () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED),
-                    () -> assertThat(response.getBody().getName()).isEqualTo("아이스 카페 아메리카노 T")
+                    () -> assertThat(response.getBody().name()).isEqualTo("아이스 카페 아메리카노 T")
             );
         }
 
@@ -112,14 +112,14 @@ public class ProductE2ETest {
         @DisplayName("GET /api/products/{id} - 유효한 조회 시 200 OK")
         void 유효한_조회_시_200_OK() {
             String url = baseUrl + port + "/api/products/" + savedProduct.getId();
-            ResponseEntity<Product> response = restClient.get()
+            ResponseEntity<ProductResponse> response = restClient.get()
                     .uri(url)
                     .header("Authorization", "Bearer " + mdToken)
                     .retrieve()
-                    .toEntity(Product.class);
+                    .toEntity(ProductResponse.class);
             assertAll(
                     () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
-                    () -> assertThat(response.getBody().getName()).isEqualTo("Initial Product")
+                    () -> assertThat(response.getBody().name()).isEqualTo("Initial Product")
             );
         }
 
@@ -151,16 +151,16 @@ public class ProductE2ETest {
                     7800,
                     null
             );
-            ResponseEntity<Product> response = restClient.patch()
+            ResponseEntity<ProductResponse> response = restClient.patch()
                     .uri(url)
                     .header("Authorization", "Bearer " + mdToken)
                     .body(patchDto)
                     .retrieve()
-                    .toEntity(Product.class);
+                    .toEntity(ProductResponse.class);
             assertAll(
                     () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
-                    () -> assertThat(response.getBody().getName()).isEqualTo("각하오 커피"),
-                    () -> assertThat(response.getBody().getImageUrl()).isNotNull()
+                    () -> assertThat(response.getBody().name()).isEqualTo("각하오 커피"),
+                    () -> assertThat(response.getBody().imageUrl()).isNotNull()
             );
         }
 
@@ -190,15 +190,15 @@ public class ProductE2ETest {
     @DisplayName("GET /api/products - 리스트 조회 시 200 OK")
     void 리스트_조회_시_200_OK() {
         String url = baseUrl + port + "/api/products";
-        ResponseEntity<List<Product>> response = restClient.get()
+        ResponseEntity<PageResponse<ProductResponse>> response = restClient.get()
                 .uri(url)
                 .header("Authorization", "Bearer " + mdToken)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<List<Product>>() {});
+                .toEntity(new ParameterizedTypeReference<>() {});
 
         assertAll(
                 () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
-                () -> assertThat(response.getBody().size()).isNotZero()
+                () -> assertThat(response.getBody().content().size()).isNotZero()
         );
     }
 

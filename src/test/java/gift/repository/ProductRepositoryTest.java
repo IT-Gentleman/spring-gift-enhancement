@@ -113,24 +113,24 @@ class ProductRepositoryTest {
         @Test
         @DisplayName("deleted가 false이며 validated가 true인 상품 목록 조회 시 정상 반환")
         void deleted가_false이며_validated가_true인_상품_목록_조회_시_정상반환() {
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(true)).hasSize(1);
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(false)).hasSize(0);
+            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(true, null)).hasSize(1);
+            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(false, null)).hasSize(0);
         }
 
         @Test
         @DisplayName("validated가 false인 상품은 목록에 포함되지 않음")
         void deleted가_false이며_validated가_false인_상품_추가_후_상품_목록_조회_시_정상반환() {
             existingProduct.setValidated(false);
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(true)).hasSize(0);
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(false)).hasSize(1);
+            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(true, null)).hasSize(0);
+            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(false, null)).hasSize(1);
         }
 
         @Test
         @DisplayName("deleted가 true인 상품은 목록에 포함되지 않음")
         void deleted가_true인_상품은_목록에_포함되지_않음() {
             existingProduct.setDeleted(true);
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(true)).hasSize(0);
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(false)).hasSize(0);
+            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(true, null)).hasSize(0);
+            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(false, null)).hasSize(0);
         }
 
     }

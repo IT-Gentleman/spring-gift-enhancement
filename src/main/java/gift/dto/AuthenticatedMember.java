@@ -9,6 +9,6 @@ public record AuthenticatedMember (
         Role authority
 ) {
     public static AuthenticatedMember from(Member member) {
-        return new AuthenticatedMember(member.getIdentifyNumber(), member.getEmail(), member.getAuthority());
+        return new AuthenticatedMember(member.getId(), member.getEmail(), member.getRole());
     }
 }

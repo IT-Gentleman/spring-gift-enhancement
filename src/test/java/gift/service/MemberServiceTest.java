@@ -1,8 +1,9 @@
 package gift.service;
 
-import gift.dto.UpdateMemberResult;
+import gift.dto.UpdateMemberResponse;
 import gift.entity.Member;
 import gift.entity.Role;
+import gift.exception.ConflictException;
 import gift.exception.InvalidCredentialsException;
 import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
@@ -17,7 +18,6 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,8 +65,8 @@ class MemberServiceTest {
                 assertAll(
                         () -> assertThat(resolve.getEmail()).isEqualTo(email),
                         () -> assertThat(resolve.getPassword()).isEqualTo(hashedPassword),
-                        () -> assertThat(resolve.getIdentifyNumber()).isEqualTo(1L),
-                        () -> assertThat(resolve.getAuthority()).isEqualTo(Role.ROLE_USER)
+                        () -> assertThat(resolve.getId()).isEqualTo(1L),
+                        () -> assertThat(resolve.getRole()).isEqualTo(Role.ROLE_USER)
                 );
             }
         }
@@ -79,7 +79,7 @@ class MemberServiceTest {
 
             when(memberRepository.findByEmail(email)).thenReturn(Optional.of(new Member(100L, email, "hashedPassword", null)));
 
-            assertThrows(ResponseStatusException.class, () -> memberService.createMember(email, rawPassword));
+            assertThrows(ConflictException.class, () -> memberService.createMember(email, rawPassword));
         }
     }
 
@@ -158,14 +158,14 @@ class MemberServiceTest {
             when(memberRepository.findById(id)).thenReturn(Optional.of(existingMember));
             when(memberRepository.findByEmail(newEmail)).thenReturn(Optional.empty());
 
-            UpdateMemberResult result = memberService.updateSelectivelyMember(id, newEmail, false, newRole);
+            UpdateMemberResponse result = memberService.updateSelectivelyMember(id, newEmail, false, newRole);
 
             assertAll(
-                    () -> assertThat(result.member().getIdentifyNumber()).isEqualTo(id),
+                    () -> assertThat(result.member().getId()).isEqualTo(id),
                     () -> assertThat(result.member().getEmail()).isEqualTo(newEmail),
                     () -> assertThat(result.member().getPassword()).isEqualTo(hashedPassword),
-                    () -> assertThat(result.member().getAuthority()).isEqualTo(newRole),
-                    () -> assertThat(result.temporalPassword()).isEmpty()
+                    () -> assertThat(result.member().getRole()).isEqualTo(newRole),
+                    () -> assertThat(result.temporalPassword()).isNull()
             );
         }
 
@@ -187,14 +187,14 @@ class MemberServiceTest {
             try (MockedStatic<BCryptEncryptor> encryptor = mockStatic(BCryptEncryptor.class)) {
                 encryptor.when(() -> BCryptEncryptor.encrypt(any())).thenReturn(newPassword);
 
-                UpdateMemberResult result = memberService.updateSelectivelyMember(id, newEmail, true, newRole);
+                UpdateMemberResponse result = memberService.updateSelectivelyMember(id, newEmail, true, newRole);
 
                 assertAll(
-                        () -> assertThat(result.member().getIdentifyNumber()).isEqualTo(id),
+                        () -> assertThat(result.member().getId()).isEqualTo(id),
                         () -> assertThat(result.member().getEmail()).isEqualTo(newEmail),
                         () -> assertThat(result.member().getPassword()).isEqualTo(newPassword),
-                        () -> assertThat(result.member().getAuthority()).isEqualTo(newRole),
-                        () -> assertThat(result.temporalPassword()).isNotEmpty()
+                        () -> assertThat(result.member().getRole()).isEqualTo(newRole),
+                        () -> assertThat(result.temporalPassword()).isNotNull()
                 );
             }
         }

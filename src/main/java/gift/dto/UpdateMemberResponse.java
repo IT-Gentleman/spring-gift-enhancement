@@ -4,8 +4,8 @@ import gift.entity.Member;
 
 import java.util.Optional;
 
-public record UpdateMemberResult (
+public record UpdateMemberResponse(
         Member member,
-        Optional<String> temporalPassword
+        String temporalPassword
 ) {
 }

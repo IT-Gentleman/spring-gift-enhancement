@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,6 +31,7 @@ class ProductAdminPageControllerTest {
 
     @Test
     void 상품목록_조회_시_상품목록페이지() throws Exception {
+        when(productService.getProductList(any(), any())).thenReturn(Page.empty());
         mockMvc.perform(get("/admin/products"))
             .andExpect(view().name("admin/product-list"))
             .andExpect(model().attributeExists("products"));
@@ -47,6 +49,7 @@ class ProductAdminPageControllerTest {
         Product mockProduct = new Product(
             1L, "아이스 카페 아메리카노 T", 4700,
             "https://st.kakaocdn.net/product/gift/product/20231010111814_9a667f9eccc943648797925498bdd8a3.jpg",
+            false,
             false
         );
         when(productService.createProduct(any(), any(), any()))
@@ -66,7 +69,8 @@ class ProductAdminPageControllerTest {
         Product mockProduct = new Product(
             1L, "&%&각하오커피&%&", -5000,
             "https://st.kakaocdn.net/product/gift/product/20231010111814_9a667f9eccc943648797925498bdd8a3.jpg",
-            false // validated
+            false,
+            false
         );
         when(productService.createProduct(any(), any(), any()))
             .thenReturn(mockProduct);
@@ -93,7 +97,7 @@ class ProductAdminPageControllerTest {
     @Test
     void 유효한_상품_조회_시_상품상세페이지() throws Exception {
         Product mockProduct = new Product(1L, "각하오커피", 7800,
-            "https://...", false);
+            "https://...", false, false);
         when(productService.getProductWhetherDeletedById(1L)).thenReturn(mockProduct);
 
         mockMvc.perform(get("/admin/products/1"))
@@ -103,7 +107,7 @@ class ProductAdminPageControllerTest {
 
     @Test
     void 유효한_상품_수정_시_리다이렉션() throws Exception {
-        Product updated = new Product(1L, "각하오 커피", 7800, "https://...", false);
+        Product updated = new Product(1L, "각하오 커피", 7800, "https://...", false, false);
         when(productService.updateProductById(eq(1L), any(), any(), any()))
                 .thenReturn(updated);
 
@@ -118,7 +122,7 @@ class ProductAdminPageControllerTest {
 
     @Test
     void 유효하지_않은_상품_수정_시_상품상세페이지() throws Exception {
-        Product existing = new Product(1L, "각하오 커피", 7800, "https://...", false);
+        Product existing = new Product(1L, "각하오 커피", 7800, "https://...", false, false);
         when(productService.getProductById(1L)).thenReturn(existing);
         when(productService.getProductWhetherDeletedById(1L)).thenReturn(existing);
 

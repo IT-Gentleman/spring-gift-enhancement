@@ -1,6 +1,7 @@
 package gift.service;
 
 import gift.entity.Product;
+import gift.exception.NotFoundException;
 import gift.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,7 +35,7 @@ class ProductServiceTest {
         String name = "Test Product";
         Integer price = 10000;
         String imageUrl = "http://example.com/image.jpg";
-        Product expectedProduct = new Product(1L, name, price, imageUrl, false);
+        Product expectedProduct = new Product(1L, name, price, imageUrl, false, false);
         when(productRepository.save(any())).thenReturn(expectedProduct);
 
         assertThat(productService.createProduct(name, price, imageUrl)).isEqualTo(expectedProduct);
@@ -48,7 +49,7 @@ class ProductServiceTest {
         @DisplayName("존재하는 상품 ID로 조회 시 상품 반환")
         void 존재하는상품ID로조회시_상품반환() {
             Long productId = 1L;
-            Product expectedProduct = new Product(productId, "Test Product", 10000, "http://example.com/image.jpg", false);
+            Product expectedProduct = new Product(productId, "Test Product", 10000, "http://example.com/image.jpg", false, false);
             when(productRepository.findByIdAndDeletedIsFalse(productId)).thenReturn(Optional.of(expectedProduct));
 
             assertThat(productService.getProductById(productId)).isEqualTo(expectedProduct);
@@ -60,7 +61,7 @@ class ProductServiceTest {
             Long productId = 999L;
             when(productRepository.findByIdAndDeletedIsFalse(productId)).thenReturn(Optional.empty());
 
-            assertThrows(ResponseStatusException.class, () -> productService.getProductById(productId));
+            assertThrows(NotFoundException.class, () -> productService.getProductById(productId));
         }
     }
 
@@ -72,7 +73,7 @@ class ProductServiceTest {
         @DisplayName("존재하는 상품 ID로 조회 시 상품 반환")
         void 존재하는상품ID로조회시_상품반환() {
             Long productId = 1L;
-            Product expectedProduct = new Product(productId, "Test Product", 10000, "http://example.com/image.jpg", false);
+            Product expectedProduct = new Product(productId, "Test Product", 10000, "http://example.com/image.jpg", false, false);
             when(productRepository.findById(productId)).thenReturn(Optional.of(expectedProduct));
 
             assertThat(productService.getProductWhetherDeletedById(productId)).isEqualTo(expectedProduct);
@@ -84,7 +85,7 @@ class ProductServiceTest {
             Long productId = 999L;
             when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-            assertThrows(ResponseStatusException.class, () -> productService.getProductWhetherDeletedById(productId));
+            assertThrows(NotFoundException.class, () -> productService.getProductWhetherDeletedById(productId));
         }
     }
 

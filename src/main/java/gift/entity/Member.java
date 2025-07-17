@@ -2,7 +2,6 @@ package gift.entity;
 
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,7 +10,7 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private Long identifyNumber;
+    private Long id;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -20,31 +19,35 @@ public class Member {
     private String password;
 
     @Column(nullable = false)
-    private Role authority;
+    private Role role;
 
     @OneToMany(mappedBy = "member")
-    //@JoinColumn(name = "member_id", nullable = false)
-    private List<WishItem> wishlist;
+    private List<Wish> wishList;
 
     protected Member() {}
 
-    public Member(Long identifyNumber, String email, String password, Role authority) {
-        this.identifyNumber = identifyNumber;
+    // all arguments constructor for test code
+    public Member(Long id, String email, String password, Role role) {
+        this.id = id;
         this.email = email;
         this.password = password;
-        this.authority = authority;
+        this.role = role;
     }
 
+    // constructor for member creation. Use as a factory method
+    public Member(String email, String password, Role role) {
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
+    // constructor for member creation with default role as ROLE_USER (for api)
     public Member(String email, String password) {
-        this(null, email, password, Role.ROLE_USER);
+        this(email, password, Role.ROLE_USER);
     }
 
-    public void setIdentifyNumber(Long identifyNumber) {
-        this.identifyNumber = identifyNumber;
-    }
-
-    public Long getIdentifyNumber() {
-        return identifyNumber;
+    public Long getId() {
+        return id;
     }
 
     public void setEmail(String email) {
@@ -55,8 +58,12 @@ public class Member {
         return email;
     }
 
-    public Role getAuthority() {
-        return authority;
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public Role getRole() {
+        return role;
     }
 
     public void setPassword(String password) {
@@ -75,7 +82,13 @@ public class Member {
             this.password = password;
         }
         if (authority != null) {
-            this.authority = authority;
+            this.role = authority;
         }
+    }
+
+    public static Member emptyOfId(Long id) {
+        Member member = new Member();
+        member.id = id;
+        return member;
     }
 }

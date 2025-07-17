@@ -1,19 +1,18 @@
 package gift.service;
 
+import gift.entity.Member;
 import gift.entity.Product;
-import gift.entity.WishItem;
+import gift.entity.Wish;
+import gift.exception.ConflictException;
 import gift.repository.WishRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.List;
-
 @Service
-@Transactional
 public class WishService {
 
     private final WishRepository wishRepository;
@@ -24,24 +23,29 @@ public class WishService {
         this.productService = productService;
     }
 
-    public List<WishItem> getWishListByMemberId(Long memberId) {
-        return wishRepository.findAllByMemberIdentifyNumber(memberId);
+    @Transactional(readOnly = true)
+    public Page<Wish> getWishListByMemberId(Long memberId, Pageable pageable) {
+        return wishRepository.findAllByMemberId(memberId, pageable);
     }
 
-    public WishItem addWishItem(Long memberId, Long productId) {
+    @Transactional
+    public Wish addWishItem(Long memberId, Long productId) {
         // 상품이 존재하는지 확인 및 반환
         Product product = productService.getProductById(productId);
-        try {
-            WishItem wishItem = new WishItem(memberId, product);
-            return wishRepository.save(wishItem);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "WishItem already exists for this product");
+
+        if (wishRepository.existsByMemberIdAndProductId(memberId, productId)) {
+            throw new ConflictException("Wish already exists for this product");
         }
+        Wish wish = new Wish(Member.emptyOfId(memberId), product);
+        return wishRepository.save(wish);
     }
 
+    @Transactional
     public void removeWishItemByWishId(Long memberId, Long wishId) {
-        if (wishRepository.removeByMemberIdentifyNumberAndId(memberId, wishId) != 1) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "WishItem not found");
+        if (!wishRepository.existsByIdAndMemberId(wishId, memberId)) {
+            // 본인소유가 아닌 wish의 경우는 hiding 처리됨
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Wish not found");
         }
+        wishRepository.deleteByIdAndMemberId(wishId, memberId);
     }
 }

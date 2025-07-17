@@ -3,38 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Landing Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 20px;
         }
-        a, button {
-            padding: 3px 6px;
-            border-radius: 4px;
-            text-decoration: none;
-            margin-right: 5px;
-            font-size: 14px;
-        }
-        button {
-            cursor: pointer;
-        }
-        a {
-            display: inline-block;
+        .container {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to the Admin Panel</h1>
-    <h2 th:if="${username != null}" th:text="'Current User: ' + ${username}">Current User</h2>
-    <h2 th:if="${role != null}" th:text="'Current Role: ' + ${role}">Current Role</h2>
+<div class="container">
+    <h1 class="mb-3">Welcome to the Admin Panel</h1>
+    <h2 th:if="${username != null}" th:text="'Current User: ' + ${username}" class="h4">Current User</h2>
+    <h2 th:if="${role != null}" th:text="'Current Role: ' + ${role}" class="h4">Current Role</h2>
     <br>
     <form th:if="${role == null}" th:action="@{/admin/login}" method="get" style="display:inline-block">
-        <button type="submit" style="background-color:black; color:white; border:1px solid black;">Login as Admin</button>
+        <button type="submit" class="btn btn-dark">Login as Admin</button>
     </form>
     <form th:if="${role != null}" th:action="@{/admin/logout}" method="post" style="display:inline-block;">
-        <button type="submit" style="background-color:black; color:white; border:1px solid black; ">Logout</button>
+        <button type="submit" class="btn btn-dark">Logout</button>
     </form>
     <br>
-    <a th:if="${role == 'ROLE_MD'}" href="/admin/products" style="background-color:green; color:white; border:1px solid green;">Go to Product Management</a>
-    <a th:if="${role == 'ROLE_ADMIN'}" href="/admin/members" style="background-color:blue; color:white; border:1px solid blue;">Go to Member Management</a>
+    <a th:if="${role == 'ROLE_MD'}" href="/admin/products" class="btn btn-success mt-2">Go to Product Management</a>
+    <a th:if="${role == 'ROLE_ADMIN'}" href="/admin/members" class="btn btn-primary mt-2">Go to Member Management</a>
+</div>
 </body>
 </html>
