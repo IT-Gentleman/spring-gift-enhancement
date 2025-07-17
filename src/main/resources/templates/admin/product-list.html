@@ -16,7 +16,7 @@
 <body>
 <div class="container">
     <h2>상품목록</h2>
-    <div class="mb-3 d-flex justify-content-between align-items-center">
+    <div class="mb-3 d-flex justify-content-between align-items-start">
         <div>
             <a th:if="${validated}"
                th:href="@{/admin/products(validated=false)}"
@@ -33,7 +33,7 @@
                 Create New Product
             </a>
         </div>
-        <form th:action="@{/admin/products}" method="get" class="form-inline">
+        <form th:action="@{/admin/products}" method="get" class="form-inline justify-content-end">
             <label for="pageSize" class="mr-2">Items per page:</label>
             <select id="pageSize" name="size" class="form-control form-control-sm mr-2">
                 <option value="10" th:selected="${products.size == 10}">10</option>
@@ -44,7 +44,16 @@
             </select>
             <input type="hidden" name="page" th:value="${products.number}">
             <input type="hidden" name="validated" th:value="${validated}">
-            <button type="submit" class="btn btn-info btn-sm">View</button>
+            <label for="sortOrder" class="mr-2">Sort by:</label>
+            <select id="sortOrder" name="sort" class="form-control form-control-sm mr-2">
+                <option value="id,asc" th:selected="${products.sort == 'id: ASC'}">ID (Asc)</option>
+                <option value="id,desc" th:selected="${products.sort == 'id: DESC'}">ID (Desc)</option>
+                <option value="name,asc" th:selected="${products.sort == 'name: ASC'}">Name (Asc)</option>
+                <option value="name,desc" th:selected="${products.sort == 'name: DESC'}">Name (Desc)</option>
+                <option value="price,asc" th:selected="${products.sort == 'price: ASC'}">Price (Asc)</option>
+                <option value="price,desc" th:selected="${products.sort == 'price: DESC'}">Price (Desc)</option>
+            </select>
+            <button type="submit" class="btn btn-info btn-sm align-self-start">View</button>
         </form>
     </div>
     <table class="table table-bordered table-hover">
@@ -61,15 +70,15 @@
         <tbody>
         <tr th:each="product: ${products.content}">
             <td th:text="${product.id}" />
-            <td>
-                <img th:src="${product.imageUrl}" width="50" />
+            <td class="text-center p-0 align-middle">
+                <img th:src="${product.imageUrl}" height="50" />
             </td>
             <td th:text="${product.name}" />
             <td th:text="${product.price}" />
-            <td>
+            <td class="text-center align-middle">
                 <a th:href="@{/admin/products/{id}(id=${product.id})}" class="btn btn-primary btn-sm">View/Edit</a>
             </td>
-            <td>
+            <td class="text-center align-middle">
                 <form th:action="@{/admin/products/{id}(id=${product.id})}"
                       method="post" style="display:inline"
                       onsubmit="return confirm('Are you sure to delete?');">

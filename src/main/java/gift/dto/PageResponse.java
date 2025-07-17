@@ -13,7 +13,8 @@ public record PageResponse<T> (
         long totalElements,
         int totalPages,
         boolean first,
-        boolean last
+        boolean last,
+        String sort
 ) {
     public static <T> PageResponse<T> from(Page<T> page) {
         return new PageResponse<>(
@@ -23,7 +24,8 @@ public record PageResponse<T> (
                 page.getTotalElements(),
                 page.getTotalPages(),
                 page.isFirst(),
-                page.isLast()
+                page.isLast(),
+                page.getSort().toString()
         );
     }
 }

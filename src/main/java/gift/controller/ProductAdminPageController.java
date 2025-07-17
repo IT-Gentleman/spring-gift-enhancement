@@ -2,6 +2,7 @@ package gift.controller;
 
 import gift.dto.CreateProductRequest;
 import gift.dto.ProductResponse;
+import gift.dto.PageResponse;
 import gift.dto.UpdateProductRequest;
 import gift.entity.Product;
 import gift.service.ProductService;
@@ -34,7 +35,7 @@ public class ProductAdminPageController {
     ) {
         Page<Product> products = productService.getProductList(validated, pageable);
         Page<ProductResponse> response = products.map(ProductResponse::from);
-        model.addAttribute("products", response);
+        model.addAttribute("products", PageResponse.from(response));
         model.addAttribute("validated", validated);
         return "admin/product-list";
     }

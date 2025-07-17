@@ -16,19 +16,32 @@
 <body>
 <div class="container">
     <h2>회원목록</h2>
-    <div class="mb-3 d-flex justify-content-between align-items-center">
-        <a href="/admin/members/new" class="btn btn-success">Register New Member</a>
-        <form th:action="@{/admin/members}" method="get" class="form-inline">
-            <label for="pageSize" class="mr-2">Items per page:</label>
-            <select id="pageSize" name="size" class="form-control form-control-sm mr-2">
-                <option value="10" th:selected="${members.size == 10}">10</option>
-                <option value="20" th:selected="${members.size == 20}">20</option>
-                <option value="30" th:selected="${members.size == 30}">30</option>
-                <option value="40" th:selected="${members.size == 40}">40</option>
-                <option value="50" th:selected="${members.size == 50}">50</option>
-            </select>
+    <div class="mb-3 d-flex justify-content-between align-items-start">
+        <div>
+            <a href="/admin/members/new" class="btn btn-success">Register New Member</a>
+        </div>
+        <form th:action="@{/admin/members}" method="get" class="form-inline justify-content-end">
+            <div class="form-inline">
+                <label for="pageSize" class="mr-2">Items per page:</label>
+                <select id="pageSize" name="size" class="form-control form-control-sm mr-2">
+                    <option value="10" th:selected="${members.size == 10}">10</option>
+                    <option value="20" th:selected="${members.size == 20}">20</option>
+                    <option value="30" th:selected="${members.size == 30}">30</option>
+                    <option value="40" th:selected="${members.size == 40}">40</option>
+                    <option value="50" th:selected="${members.size == 50}">50</option>
+                </select>
+            </div>
+            <div class="form-inline">
+                <label for="sortOrder" class="mr-2">Sort by:</label>
+                <select id="sortOrder" name="sort" class="form-control form-control-sm mr-2">
+                    <option value="id,asc" th:selected="${members.sort == 'id: ASC'}">ID (Asc)</option>
+                    <option value="id,desc" th:selected="${members.sort == 'id: DESC'}">ID (Desc)</option>
+                    <option value="email,asc" th:selected="${members.sort == 'email: ASC'}">Email (Asc)</option>
+                    <option value="email,desc" th:selected="${members.sort == 'email: DESC'}">Email (Desc)</option>
+                </select>
+            </div>
             <input type="hidden" name="page" th:value="${members.number}">
-            <button type="submit" class="btn btn-info btn-sm">View</button>
+            <button type="submit" class="btn btn-info btn-sm ml-2">View</button>
         </form>
     </div>
     <table class="table table-bordered table-hover">
