@@ -4,14 +4,17 @@ import gift.dto.CreateMemberRequest;
 import gift.dto.MemberDto;
 import gift.dto.MemberResponse;
 import gift.dto.NewMemberCommand;
+import gift.dto.PageRequest;
 import gift.dto.PageResponse;
 import gift.dto.UpdateMemberCommand;
 import gift.dto.UpdateMemberRequest;
 import gift.service.MemberService;
 import jakarta.validation.Valid;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -36,9 +39,15 @@ public class MemberAdminPageController {
 
     @GetMapping
     public String getMembers(
-            Pageable pageable,
-            Model model
+            Model model,
+            @Valid PageRequest pageRequest
     ) {
+        Set<String> allowedSortFields = Set.of("id", "email");
+        String defaultSortField = "id";
+        Sort.Direction defaultSortDirection = Sort.Direction.DESC;
+        Pageable pageable = pageRequest.toPageable(allowedSortFields, defaultSortField,
+                defaultSortDirection);
+
         Page<MemberDto> memberList = memberService.getMemberList(pageable);
         Page<MemberResponse> response = memberList.map(MemberResponse::from);
         model.addAttribute("members", PageResponse.from(response));

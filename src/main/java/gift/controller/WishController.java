@@ -3,14 +3,17 @@ package gift.controller;
 import gift.dto.AddWishRequest;
 import gift.dto.AuthenticatedMember;
 import gift.dto.NewWishCommand;
+import gift.dto.PageRequest;
 import gift.dto.PageResponse;
 import gift.dto.WishDto;
 import gift.dto.WishResponse;
 import gift.service.WishService;
 import gift.validator.LoginMember;
 import jakarta.validation.Valid;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,9 +36,15 @@ public class WishController {
 
     @GetMapping
     public ResponseEntity<PageResponse<WishResponse>> getWishList(
-            @LoginMember AuthenticatedMember member,
-            Pageable pageable
+            @Valid PageRequest pageRequest,
+            @LoginMember AuthenticatedMember member
     ) {
+        Set<String> allowedSortFields = Set.of("addedAt", "product.name", "product.price");
+        String defaultSortField = "addedAt";
+        Sort.Direction defaultSortDirection = Sort.Direction.DESC;
+        Pageable pageable = pageRequest.toPageable(allowedSortFields, defaultSortField,
+                defaultSortDirection);
+
         Page<WishDto> wishPage = wishService.getWishListByMemberId(member.id(), pageable);
         Page<WishResponse> wishResponsePage = wishPage.map(wish -> WishResponse.from(wish));
         PageResponse<WishResponse> pageResponse = PageResponse.from(wishResponsePage);

@@ -46,6 +46,9 @@
             <input type="hidden" name="validated" th:value="${validated}">
             <label for="sortOrder" class="mr-2">Sort by:</label>
             <select id="sortOrder" name="sort" class="form-control form-control-sm mr-2">
+                <option value="createdAt,desc" th:selected="${products.sort == 'createdAt: DESC'}">Created At (Desc)</option>
+                <option value="createdAt,asc" th:selected="${products.sort == 'createdAt: ASC'}">Created At (Asc)</option>
+                <option value="--------------" disabled>-----</option>
                 <option value="id,asc" th:selected="${products.sort == 'id: ASC'}">ID (Asc)</option>
                 <option value="id,desc" th:selected="${products.sort == 'id: DESC'}">ID (Desc)</option>
                 <option value="name,asc" th:selected="${products.sort == 'name: ASC'}">Name (Asc)</option>

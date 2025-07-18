@@ -2,6 +2,7 @@ package gift.controller;
 
 import gift.dto.CreateProductRequest;
 import gift.dto.NewProductCommand;
+import gift.dto.PageRequest;
 import gift.dto.PageResponse;
 import gift.dto.ProductDto;
 import gift.dto.ProductResponse;
@@ -9,9 +10,11 @@ import gift.dto.UpdateProductCommand;
 import gift.dto.UpdateProductRequest;
 import gift.service.ProductService;
 import jakarta.validation.Valid;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -39,9 +42,15 @@ public class ProductAdminPageController {
     @GetMapping
     public String getProducts(
             @RequestParam(defaultValue = "true", required = false) Boolean validated,
-            Pageable pageable,
-            Model model
+            Model model,
+            @Valid PageRequest pageRequest
     ) {
+        Set<String> allowedSortFields = Set.of("id", "name", "price");
+        String defaultSortField = "id";
+        Sort.Direction defaultSortDirection = Sort.Direction.ASC;
+        Pageable pageable = pageRequest.toPageable(allowedSortFields, defaultSortField,
+                defaultSortDirection);
+
         Page<ProductDto> pagedDto = productService.getProductList(validated, pageable);
         Page<ProductResponse> response = pagedDto.map(ProductResponse::from);
         model.addAttribute("products", PageResponse.from(response));
