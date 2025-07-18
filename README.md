@@ -136,9 +136,8 @@
 - [x] Pageable 인자
   제한 ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2212729198))
     - Pageable 인자를 그대로 받는 대신, `PageRequest` Dto를 사용하여 페이지네이션 요청을 제한
-- [ ] 예외발생 메시지의 예외발생 항목 명시
+- [x] 예외발생 메시지의 예외발생 항목 명시
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213632458))
--
 
 ## TODO
 

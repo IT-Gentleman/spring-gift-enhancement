@@ -69,11 +69,11 @@ public class ProductService {
 
     protected Product findProductByIdAndNotDeleted(Long id) {
         return productRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException("Product not found"));
+                .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
     }
 
     protected Product findProductByIdIncludingDeleted(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Product not found"));
+                .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
     }
 }

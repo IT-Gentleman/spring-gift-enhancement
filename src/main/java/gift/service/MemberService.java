@@ -81,7 +81,7 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long id) {
         if (!memberRepository.existsById(id)) {
-            throw new NotFoundException("Member not found");
+            throw new NotFoundException("Member not found: id=" + id);
         }
         memberRepository.deleteById(id);
     }
@@ -101,12 +101,12 @@ public class MemberService {
 
     protected Member findMemberById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Member not found"));
+                .orElseThrow(() -> new NotFoundException("Member not found: id=" + id));
     }
 
     private void checkValidMemberUpdate(String email, Long memberId) {
         if (!isEmailUsable(email, memberId)) {
-            throw new ConflictException("Email already in use");
+            throw new ConflictException("Email already in use: email=" + email);
         }
     }
 

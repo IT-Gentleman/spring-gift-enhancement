@@ -39,7 +39,8 @@ public class WishService {
         Product product = productService.findProductByIdAndNotDeleted(wishCommand.productId());
 
         if (wishRepository.existsByMemberIdAndProductId(member.getId(), product.getId())) {
-            throw new ConflictException("You already added this product to wishlist");
+            throw new ConflictException("You already added this product to wishlist: productId="
+                    + product.getId() + "(product name=" + product.getName() + ")");
         }
         Wish wish = new Wish(member, product);
         return WishDto.from(wishRepository.save(wish));
@@ -49,11 +50,11 @@ public class WishService {
     public void removeWishItemByWishId(Long memberId, Long wishId) {
         // 삭제하고자 하는 wish 조회
         Wish wish = wishRepository.findById(wishId)
-                .orElseThrow(() -> new NotFoundException("Wish not found"));
+                .orElseThrow(() -> new NotFoundException("Wish not found: id=" + wishId));
         // wish의 소유자가 본인인지 확인
         if (!wish.getMember().getId().equals(memberId)) {
             // 본인소유가 아닌 wish의 경우는 hiding 처리됨
-            throw new NotFoundException("Wish not found");
+            throw new NotFoundException("Wish not found: id=" + wishId);
         }
         // 본인소유인 경우 삭제
         wishRepository.deleteById(wishId);
