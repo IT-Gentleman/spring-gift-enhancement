@@ -1,6 +1,5 @@
 package gift.dto;
 
-import gift.entity.Product;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -28,11 +27,11 @@ public record UpdateProductRequest(
         return new UpdateProductRequest("", 1, "");
     }
 
-    public static UpdateProductRequest from(Product product) {
+    public static UpdateProductRequest from(ProductDto productDto) {
         return new UpdateProductRequest(
-                product.getName(),
-                product.getPrice(),
-                product.getImageUrl()
+                productDto.name(),
+                productDto.price(),
+                productDto.imageUrl()
         );
     }
 }

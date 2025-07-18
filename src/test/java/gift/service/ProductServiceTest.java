@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import gift.dto.NewProductCommand;
+import gift.dto.ProductDto;
 import gift.entity.Product;
 import gift.exception.NotFoundException;
 import gift.repository.ProductRepository;
@@ -35,7 +37,9 @@ class ProductServiceTest {
         Product expectedProduct = new Product(1L, name, price, imageUrl, false, false);
         when(productRepository.save(any())).thenReturn(expectedProduct);
 
-        assertThat(productService.createProduct(name, price, imageUrl)).isEqualTo(expectedProduct);
+        assertThat(productService.createProduct(
+                new NewProductCommand(name, price, imageUrl))).isEqualTo(
+                ProductDto.from(expectedProduct));
     }
 
     @Nested
@@ -51,7 +55,8 @@ class ProductServiceTest {
             when(productRepository.findByIdAndDeletedIsFalse(productId)).thenReturn(
                     Optional.of(expectedProduct));
 
-            assertThat(productService.getProductById(productId)).isEqualTo(expectedProduct);
+            assertThat(productService.getProductById(productId)).isEqualTo(
+                    ProductDto.from(expectedProduct));
         }
 
         @Test
@@ -78,7 +83,7 @@ class ProductServiceTest {
             when(productRepository.findById(productId)).thenReturn(Optional.of(expectedProduct));
 
             assertThat(productService.getProductWhetherDeletedById(productId)).isEqualTo(
-                    expectedProduct);
+                    ProductDto.from(expectedProduct));
         }
 
         @Test

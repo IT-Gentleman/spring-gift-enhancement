@@ -1,7 +1,6 @@
 package gift.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -12,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import gift.dto.ProductDto;
 import gift.entity.Product;
 import gift.handler.LoginMemberArgumentResolver;
 import gift.service.ProductService;
@@ -59,8 +59,7 @@ class ProductAdminPageControllerTest {
                 false,
                 false
         );
-        when(productService.createProduct(any(), any(), any()))
-                .thenReturn(mockProduct);
+        when(productService.createProduct(any())).thenReturn(ProductDto.from(mockProduct));
 
         mockMvc.perform(
                         post("/admin/products")
@@ -79,8 +78,7 @@ class ProductAdminPageControllerTest {
                 false,
                 false
         );
-        when(productService.createProduct(any(), any(), any()))
-                .thenReturn(mockProduct);
+        when(productService.createProduct(any())).thenReturn(ProductDto.from(mockProduct));
 
         mockMvc.perform(
                         post("/admin/products")
@@ -105,7 +103,8 @@ class ProductAdminPageControllerTest {
     void 유효한_상품_조회_시_상품상세페이지() throws Exception {
         Product mockProduct = new Product(1L, "각하오커피", 7800,
                 "https://...", false, false);
-        when(productService.getProductWhetherDeletedById(1L)).thenReturn(mockProduct);
+        when(productService.getProductWhetherDeletedById(any())).thenReturn(
+                ProductDto.from(mockProduct));
 
         mockMvc.perform(get("/admin/products/1"))
                 .andExpect(view().name("admin/product-form"));
@@ -115,8 +114,7 @@ class ProductAdminPageControllerTest {
     @Test
     void 유효한_상품_수정_시_리다이렉션() throws Exception {
         Product updated = new Product(1L, "각하오 커피", 7800, "https://...", false, false);
-        when(productService.updateProductById(eq(1L), any(), any(), any()))
-                .thenReturn(updated);
+        when(productService.updateProductById(any())).thenReturn(ProductDto.from(updated));
 
         mockMvc.perform(
                         put("/admin/products/1")
@@ -130,8 +128,9 @@ class ProductAdminPageControllerTest {
     @Test
     void 유효하지_않은_상품_수정_시_상품상세페이지() throws Exception {
         Product existing = new Product(1L, "각하오 커피", 7800, "https://...", false, false);
-        when(productService.getProductById(1L)).thenReturn(existing);
-        when(productService.getProductWhetherDeletedById(1L)).thenReturn(existing);
+        when(productService.getProductById(any())).thenReturn(ProductDto.from(existing));
+        when(productService.getProductWhetherDeletedById(any())).thenReturn(
+                ProductDto.from(existing));
 
         mockMvc.perform(
                         put("/admin/products/1")

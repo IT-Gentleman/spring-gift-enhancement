@@ -1,9 +1,11 @@
 package gift.service;
 
 import gift.dto.AuthenticatedMember;
-import gift.dto.UpdateMemberResponse;
+import gift.dto.LoginMemberCommand;
+import gift.dto.MemberDto;
+import gift.dto.NewMemberCommand;
+import gift.dto.UpdateMemberCommand;
 import gift.entity.Member;
-import gift.entity.Role;
 import gift.exception.ConflictException;
 import gift.exception.InvalidCredentialsException;
 import gift.exception.NotFoundException;
@@ -31,18 +33,19 @@ public class MemberService {
     }
 
     @Transactional
-    public Member createMember(String email, String rawPassword) {
-        checkValidMemberUpdate(email, null);
+    public MemberDto createMember(NewMemberCommand newMemberCommand) {
+        checkValidMemberUpdate(newMemberCommand.email(), null);
 
-        String encodedPassword = BCryptEncryptor.encrypt(rawPassword);
-        Member member = new Member(email, encodedPassword);
-        return memberRepository.save(member);
+        String encodedPassword = BCryptEncryptor.encrypt(newMemberCommand.password());
+        Member member = new Member(newMemberCommand.email(), encodedPassword,
+                newMemberCommand.role());
+        return MemberDto.from(memberRepository.save(member));
     }
 
     @Transactional(readOnly = true)
-    public String login(String email, String rawPassword) {
-        Optional<Member> optionalMember = memberRepository.findByEmail(email);
-        if (optionalMember.isEmpty() || !BCryptEncryptor.matches(rawPassword,
+    public String login(LoginMemberCommand command) {
+        Optional<Member> optionalMember = memberRepository.findByEmail(command.email());
+        if (optionalMember.isEmpty() || !BCryptEncryptor.matches(command.password(),
                 optionalMember.get().getPassword())) {
             throw new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
@@ -50,30 +53,29 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Member> getMemberList(Pageable pageable) {
-        return memberRepository.findAll(pageable);
+    public Page<MemberDto> getMemberList(Pageable pageable) {
+        Page<Member> memberPage = memberRepository.findAll(pageable);
+        return memberPage.map(MemberDto::from);
     }
 
     @Transactional(readOnly = true)
-    public Member getMemberById(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Member not found"));
+    public MemberDto getMemberById(Long id) {
+        Member member = findMemberById(id);
+        return MemberDto.from(member);
     }
 
     @Transactional
-    public UpdateMemberResponse updateSelectivelyMember(Long id, String email,
-            Boolean resetPassword, Role authority) {
-        // getMemberById는 readOnly=true이나, 이미 활성화된 Transaction(readOnly=false)에 참여하는 형태
-        Member member = getMemberById(id);
-        checkValidMemberUpdate(email, member.getId());
+    public MemberDto updateMember(UpdateMemberCommand updateMemberCommand) {
+        Member member = findMemberById(updateMemberCommand.id());
+        checkValidMemberUpdate(updateMemberCommand.email(), member.getId());
         String rawPassword = null;
         String encodedPassword = null;
-        if (resetPassword) {
-            rawPassword = PasswordUtility.generateRandomPassword(15);
+        if (updateMemberCommand.resetPassword()) {
+            rawPassword = PasswordUtility.generateRandomPassword();
             encodedPassword = BCryptEncryptor.encrypt(rawPassword);
         }
-        member.applyPatch(email, encodedPassword, authority);
-        return new UpdateMemberResponse(member, rawPassword);
+        member.applyPatch(updateMemberCommand.email(), encodedPassword, updateMemberCommand.role());
+        return MemberDto.from(member, rawPassword);
     }
 
     @Transactional
@@ -95,6 +97,11 @@ public class MemberService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
         return AuthenticatedMember.from(optionalMember.get());
+    }
+
+    protected Member findMemberById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Member not found"));
     }
 
     private void checkValidMemberUpdate(String email, Long memberId) {

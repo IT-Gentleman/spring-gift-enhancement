@@ -1,10 +1,12 @@
 package gift.controller;
 
 import gift.dto.CreateProductRequest;
+import gift.dto.NewProductCommand;
 import gift.dto.PageResponse;
+import gift.dto.ProductDto;
 import gift.dto.ProductResponse;
+import gift.dto.UpdateProductCommand;
 import gift.dto.UpdateProductRequest;
-import gift.entity.Product;
 import gift.service.ProductService;
 import jakarta.validation.Valid;
 import java.util.stream.Collectors;
@@ -40,8 +42,8 @@ public class ProductAdminPageController {
             Pageable pageable,
             Model model
     ) {
-        Page<Product> products = productService.getProductList(validated, pageable);
-        Page<ProductResponse> response = products.map(ProductResponse::from);
+        Page<ProductDto> pagedDto = productService.getProductList(validated, pageable);
+        Page<ProductResponse> response = pagedDto.map(ProductResponse::from);
         model.addAttribute("products", PageResponse.from(response));
         model.addAttribute("validated", validated);
         return "admin/product-list";
@@ -72,14 +74,15 @@ public class ProductAdminPageController {
             model.addAttribute("message", "Invalid input. Check again.\n" + errorMessages);
             return "admin/product-form";
         }
-        Product created = productService.createProduct(
+        NewProductCommand command = new NewProductCommand(
                 request.name(),
                 request.price(),
                 request.imageUrl()
         );
+        ProductDto created = productService.createProduct(command);
         redirectAttributes.addFlashAttribute("message",
-                writeMessageWithValidated("Product created", created.isValidated()));
-        return "redirect:/admin/products/" + created.getId();
+                writeMessageWithValidated("Product created", created.validated()));
+        return "redirect:/admin/products/" + created.id();
     }
 
     @PatchMapping("/{id}")
@@ -98,10 +101,10 @@ public class ProductAdminPageController {
             @PathVariable Long id,
             Model model
     ) {
-        Product product = productService.getProductWhetherDeletedById(id);
-        UpdateProductRequest dto = UpdateProductRequest.from(product);
-        Boolean validated = product.isValidated();
-        Boolean deleted = product.isDeleted();
+        ProductDto dto = productService.getProductWhetherDeletedById(id);
+        UpdateProductRequest request = UpdateProductRequest.from(dto);
+        Boolean validated = dto.validated();
+        Boolean deleted = dto.deleted();
         model.addAttribute("productId", id);
         model.addAttribute("product", dto);
         model.addAttribute("validated", validated);
@@ -118,13 +121,13 @@ public class ProductAdminPageController {
             RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
-            Product originalProduct = productService.getProductWhetherDeletedById(id);
+            ProductDto dto = productService.getProductWhetherDeletedById(id);
             model.addAttribute("productId", id);
-            model.addAttribute("validated", originalProduct.isValidated());
-            if (originalProduct.isDeleted()) {
+            model.addAttribute("validated", dto.validated());
+            if (dto.deleted()) {
                 model.addAttribute("message",
                         "This product has been deleted and cannot be modified.");
-                model.addAttribute("product", UpdateProductRequest.from(originalProduct));
+                model.addAttribute("product", UpdateProductRequest.from(dto));
                 model.addAttribute("deleted", true);
             } else {
                 String errorMessages = bindingResult.getFieldErrors().stream()
@@ -136,14 +139,15 @@ public class ProductAdminPageController {
             }
             return "admin/product-form";
         }
-        Product updated = productService.updateProductById(
+        UpdateProductCommand command = new UpdateProductCommand(
                 id,
                 request.name(),
                 request.price(),
                 request.imageUrl()
         );
+        ProductDto updated = productService.updateProductById(command);
         redirectAttributes.addFlashAttribute("message",
-                writeMessageWithValidated("Product updated", updated.isValidated()));
+                writeMessageWithValidated("Product updated", updated.validated()));
         return "redirect:/admin/products/" + id;
     }
 

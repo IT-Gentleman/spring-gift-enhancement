@@ -1,7 +1,9 @@
 package gift.controller;
 
+import gift.dto.LoginMemberCommand;
 import gift.dto.LoginMemberRequest;
 import gift.dto.LoginMemberResponse;
+import gift.dto.NewMemberCommand;
 import gift.dto.RegisterMemberRequest;
 import gift.dto.RegisterMemberResponse;
 import gift.service.MemberService;
@@ -27,12 +29,17 @@ public class MemberController {
     public ResponseEntity<RegisterMemberResponse> createMember(
             @Valid @RequestBody RegisterMemberRequest registerMemberRequest
     ) {
-        memberService.createMember(registerMemberRequest.email(), registerMemberRequest.password());
-
-        String token = memberService.login(
+        NewMemberCommand newMemberCommand = new NewMemberCommand(
                 registerMemberRequest.email(),
                 registerMemberRequest.password()
         );
+        memberService.createMember(newMemberCommand);
+
+        LoginMemberCommand loginMemberCommand = new LoginMemberCommand(
+                registerMemberRequest.email(),
+                registerMemberRequest.password()
+        );
+        String token = memberService.login(loginMemberCommand);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -43,10 +50,11 @@ public class MemberController {
     public ResponseEntity<LoginMemberResponse> login(
             @Valid @RequestBody LoginMemberRequest loginMemberRequest
     ) {
-        String token = memberService.login(
+        LoginMemberCommand loginMemberCommand = new LoginMemberCommand(
                 loginMemberRequest.email(),
                 loginMemberRequest.password()
         );
+        String token = memberService.login(loginMemberCommand);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

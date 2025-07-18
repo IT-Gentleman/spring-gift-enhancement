@@ -112,20 +112,21 @@
     - 코드
       단순화 ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213658541))
 - [x] 기존 WishItem 명시된 Dto 명칭 변경 (`*WishItem*` -> `*Wish*`)
-- [ ] Controller 레이어와 Service 레이어 간 데이터 전송 시 Dto 사용
+- [x] Controller 레이어와 Service 레이어 간 데이터 전송 시 Dto 사용
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2212749414))
     - Controller -> Service : `객체명 Command Dto` 사용
     - Service -> Controller : `객체명 Dto` 사용
-- [ ] 연관관계 매핑 시 '실제 객체' 조회 후 사용하도록
+    - 단일클래스/동일계층 간 객체 반환을 위해 protected 메소드 추가
+- [x] 연관관계 매핑 시 '실제 객체' 조회 후 사용하도록
   변경 ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2212786836))
     - 설계 안정성 증대 목적. emptyOfId() 메소드 삭제
-- [ ] Repository 레이어로부터 비즈니스 로직 책임 분리
+- [x] Repository 레이어로부터 비즈니스 로직 책임 분리
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213629548))
-    - `existsByIdAndMemberId()`, `deleteByIdAndMemberId()` 메소드가 이에 해당
+    - `existsByIdAndMemberId()` 후 `deleteByIdAndMemberId()` 호출하는 경우가 이에 해당
     - 단순히 id를 통해 불러오고 검증한 뒤, id를 기반으로 삭제요청하는 것으로 변경
 - [ ] MemberService 클래스의 멤버정보 추가/갱신 메소드 리펙터링
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213655818))
-- [ ] Utility 클래스 리펙터링
+- [x] Utility 클래스 리펙터링
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213672336))
 - [ ] 연관관계 어노테이션 속성 부여를 통한
   성능개선 ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213616355))

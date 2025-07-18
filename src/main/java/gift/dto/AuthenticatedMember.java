@@ -6,7 +6,7 @@ import gift.entity.Role;
 public record AuthenticatedMember(
         Long id,
         String email,
-        Role authority
+        Role role
 ) {
 
     public static AuthenticatedMember from(Member member) {

@@ -1,5 +1,6 @@
 package gift.controller;
 
+import gift.dto.LoginMemberCommand;
 import gift.dto.LoginMemberRequest;
 import gift.exception.InvalidCredentialsException;
 import gift.service.MemberService;
@@ -51,7 +52,9 @@ public class LoginAdminPageController {
         }
 
         try {
-            String token = memberService.login(request.email(), request.password());
+            LoginMemberCommand command = new LoginMemberCommand(request.email(),
+                    request.password());
+            String token = memberService.login(command);
             Cookie cookie = new Cookie("token", token);
             cookie.setHttpOnly(true);
             cookie.setPath("/");

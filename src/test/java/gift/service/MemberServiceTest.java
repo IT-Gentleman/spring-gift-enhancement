@@ -4,10 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-import gift.dto.UpdateMemberResponse;
+import gift.dto.LoginMemberCommand;
+import gift.dto.MemberDto;
+import gift.dto.NewMemberCommand;
+import gift.dto.UpdateMemberCommand;
 import gift.entity.Member;
 import gift.entity.Role;
 import gift.exception.ConflictException;
@@ -15,6 +19,7 @@ import gift.exception.InvalidCredentialsException;
 import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
 import gift.util.BCryptEncryptor;
+import gift.util.PasswordUtility;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -62,13 +67,14 @@ class MemberServiceTest {
                         .thenReturn(hashedPassword);
                 when(memberRepository.save(any(Member.class))).thenReturn(expectedMember);
 
-                Member resolve = memberService.createMember(email, rawPassword);
+                MemberDto resolve = memberService.createMember(
+                        new NewMemberCommand(email, rawPassword));
 
                 assertAll(
-                        () -> assertThat(resolve.getEmail()).isEqualTo(email),
-                        () -> assertThat(resolve.getPassword()).isEqualTo(hashedPassword),
-                        () -> assertThat(resolve.getId()).isEqualTo(1L),
-                        () -> assertThat(resolve.getRole()).isEqualTo(Role.ROLE_USER)
+                        () -> assertThat(resolve.email()).isEqualTo(email),
+                        () -> assertThat(resolve.password()).isNull(),
+                        () -> assertThat(resolve.id()).isEqualTo(1L),
+                        () -> assertThat(resolve.role()).isEqualTo(Role.ROLE_USER)
                 );
             }
         }
@@ -83,7 +89,7 @@ class MemberServiceTest {
                     Optional.of(new Member(100L, email, "hashedPassword", null)));
 
             assertThrows(ConflictException.class,
-                    () -> memberService.createMember(email, rawPassword));
+                    () -> memberService.createMember(new NewMemberCommand(email, rawPassword)));
         }
     }
 
@@ -107,7 +113,7 @@ class MemberServiceTest {
                         .thenReturn(true);
                 when(jwtTokenProvider.createToken(existingMember)).thenReturn("validToken");
 
-                String token = memberService.login(email, rawPassword);
+                String token = memberService.login(new LoginMemberCommand(email, rawPassword));
 
                 assertThat(token).isEqualTo("validToken");
             }
@@ -123,7 +129,7 @@ class MemberServiceTest {
             when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
             assertThrows(InvalidCredentialsException.class,
-                    () -> memberService.login(email, rawPassword));
+                    () -> memberService.login(new LoginMemberCommand(email, rawPassword)));
         }
 
         @Test
@@ -143,14 +149,14 @@ class MemberServiceTest {
                         .thenReturn(false);
 
                 assertThrows(InvalidCredentialsException.class,
-                        () -> memberService.login(email, rawPassword));
+                        () -> memberService.login(new LoginMemberCommand(email, rawPassword)));
             }
         }
     }
 
     @Nested
-    @DisplayName("Member updateSelectivelyMember() - 회원 정보 수정 테스트")
-    class UpdateSelectivelyMemberTests {
+    @DisplayName("Member updateMember() - 회원 정보 수정 테스트")
+    class UpdateMemberTests {
 
         @Test
         @DisplayName("정상적인 회원 정보 수정 - 비밀번호 유지")
@@ -166,15 +172,14 @@ class MemberServiceTest {
             when(memberRepository.findById(id)).thenReturn(Optional.of(existingMember));
             when(memberRepository.findByEmail(newEmail)).thenReturn(Optional.empty());
 
-            UpdateMemberResponse result = memberService.updateSelectivelyMember(id, newEmail, false,
-                    newRole);
+            MemberDto result = memberService.updateMember(
+                    new UpdateMemberCommand(id, newEmail, false, newRole));
 
             assertAll(
-                    () -> assertThat(result.member().getId()).isEqualTo(id),
-                    () -> assertThat(result.member().getEmail()).isEqualTo(newEmail),
-                    () -> assertThat(result.member().getPassword()).isEqualTo(hashedPassword),
-                    () -> assertThat(result.member().getRole()).isEqualTo(newRole),
-                    () -> assertThat(result.temporalPassword()).isNull()
+                    () -> assertThat(result.id()).isEqualTo(id),
+                    () -> assertThat(result.email()).isEqualTo(newEmail),
+                    () -> assertThat(result.password()).isNull(),
+                    () -> assertThat(result.role()).isEqualTo(newRole)
             );
         }
 
@@ -193,18 +198,24 @@ class MemberServiceTest {
             when(memberRepository.findById(id)).thenReturn(Optional.of(existingMember));
             when(memberRepository.findByEmail(newEmail)).thenReturn(Optional.empty());
 
-            try (MockedStatic<BCryptEncryptor> encryptor = mockStatic(BCryptEncryptor.class)) {
-                encryptor.when(() -> BCryptEncryptor.encrypt(any())).thenReturn(newPassword);
+            try (
+                    MockedStatic<BCryptEncryptor> encryptor = mockStatic(BCryptEncryptor.class);
+                    MockedStatic<PasswordUtility> generateRandomPassword = mockStatic(
+                            PasswordUtility.class)
+            ) {
+                encryptor.when(() -> BCryptEncryptor.encrypt(anyString()))
+                        .thenReturn(hashedPassword); // 검증대상은 아님
+                generateRandomPassword.when(() -> PasswordUtility.generateRandomPassword())
+                        .thenReturn(newPassword);
 
-                UpdateMemberResponse result = memberService.updateSelectivelyMember(id, newEmail,
-                        true, newRole);
+                MemberDto result = memberService.updateMember(
+                        new UpdateMemberCommand(id, newEmail, true, newRole));
 
                 assertAll(
-                        () -> assertThat(result.member().getId()).isEqualTo(id),
-                        () -> assertThat(result.member().getEmail()).isEqualTo(newEmail),
-                        () -> assertThat(result.member().getPassword()).isEqualTo(newPassword),
-                        () -> assertThat(result.member().getRole()).isEqualTo(newRole),
-                        () -> assertThat(result.temporalPassword()).isNotNull()
+                        () -> assertThat(result.id()).isEqualTo(id),
+                        () -> assertThat(result.email()).isEqualTo(newEmail),
+                        () -> assertThat(result.password()).isEqualTo(newPassword),
+                        () -> assertThat(result.role()).isEqualTo(newRole)
                 );
             }
         }

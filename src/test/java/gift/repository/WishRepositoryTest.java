@@ -138,38 +138,4 @@ class WishRepositoryTest {
             assertThat(wishes.getContent()).hasSize(0);
         }
     }
-
-    @Nested
-    @DisplayName("Integer deleteByIdAndMemberId(Long memberId, Long wishId) - 위시 아이템 삭제 테스트")
-    class RemoveByMemberIdentifyNumberAndProductIdTests {
-
-        @Test
-        @DisplayName("정상적인 memberId와 wishId로 위시 아이템 삭제 시 삭제")
-        void 정상적인_memberId와_productId로_위시_아이템_삭제_시_삭제() {
-            Wish wish = new Wish(
-                    existingMember,
-                    existingProduct
-            );
-            wish = wishRepository.save(wish);
-
-            assertThat(wishRepository.findById(wish.getId())).isPresent();
-            wishRepository.deleteByIdAndMemberId(wish.getId(), existingMember.getId());
-            assertThat(wishRepository.findById(wish.getId())).isEmpty();
-        }
-
-        @Test
-        @DisplayName("존재하는 memberId에 대해 존재하지 않는 productId로 위시 아이템 삭제 시 미삭제")
-        void 존재하는_memberId에_대해_존재하지_않는_productId로_위시_아이템_삭제_시_미삭제() {
-            // 본인 소유가 아닌 wish 삭제 시도
-            Wish wish = new Wish(
-                    existingMember,
-                    existingProduct
-            );
-            wish = wishRepository.save(wish);
-
-            assertThat(wishRepository.findById(wish.getId())).isPresent();
-            wishRepository.deleteByIdAndMemberId(wish.getId(), 999L);
-            assertThat(wishRepository.findById(wish.getId())).isPresent();
-        }
-    }
 }

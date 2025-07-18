@@ -1,6 +1,5 @@
 package gift.dto;
 
-import gift.entity.Member;
 import gift.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -22,12 +21,12 @@ public record UpdateMemberRequest(
         Role role
 ) {
 
-    public static UpdateMemberRequest from(Member member) {
+    public static UpdateMemberRequest from(MemberDto memberDto) {
         return new UpdateMemberRequest(
-                member.getId(),
-                member.getEmail(),
-                false,
-                member.getRole()
+                memberDto.id(),
+                memberDto.email(),
+                false, // resetPassword is false by default
+                memberDto.role()
         );
     }
 }

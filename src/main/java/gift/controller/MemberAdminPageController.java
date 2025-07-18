@@ -1,11 +1,12 @@
 package gift.controller;
 
 import gift.dto.CreateMemberRequest;
+import gift.dto.MemberDto;
 import gift.dto.MemberResponse;
+import gift.dto.NewMemberCommand;
 import gift.dto.PageResponse;
+import gift.dto.UpdateMemberCommand;
 import gift.dto.UpdateMemberRequest;
-import gift.dto.UpdateMemberResponse;
-import gift.entity.Member;
 import gift.service.MemberService;
 import jakarta.validation.Valid;
 import java.util.stream.Collectors;
@@ -38,7 +39,7 @@ public class MemberAdminPageController {
             Pageable pageable,
             Model model
     ) {
-        Page<Member> memberList = memberService.getMemberList(pageable);
+        Page<MemberDto> memberList = memberService.getMemberList(pageable);
         Page<MemberResponse> response = memberList.map(MemberResponse::from);
         model.addAttribute("members", PageResponse.from(response));
         return "admin/member-list";
@@ -67,10 +68,15 @@ public class MemberAdminPageController {
             model.addAttribute("message", "Invalid input. Check again.\n" + errorMessages);
             return "admin/member-form";
         }
-        Member createdMember = memberService.createMember(request.email(), request.password());
+        NewMemberCommand newMemberCommand = new NewMemberCommand(
+                request.email(),
+                request.password(),
+                request.role()
+        );
+        MemberDto createdMember = memberService.createMember(newMemberCommand);
         model.addAttribute("member", UpdateMemberRequest.from(createdMember));
         redirectAttributes.addFlashAttribute("message", "Member created successfully.");
-        return "redirect:/admin/members/" + createdMember.getId();
+        return "redirect:/admin/members/" + createdMember.id();
     }
 
     @GetMapping("/{id}")
@@ -78,7 +84,7 @@ public class MemberAdminPageController {
             @PathVariable("id") Long identifyNumber,
             Model model
     ) {
-        Member member = memberService.getMemberById(identifyNumber);
+        MemberDto member = memberService.getMemberById(identifyNumber);
         model.addAttribute("member", UpdateMemberRequest.from(member));
         model.addAttribute("memberId", identifyNumber);
         return "admin/member-form";
@@ -101,14 +107,14 @@ public class MemberAdminPageController {
             model.addAttribute("message", "Invalid input. Check again.\n" + errorMessages);
             return "admin/member-form";
         }
-        UpdateMemberResponse updatedMemberResult = memberService.updateSelectivelyMember(
+        UpdateMemberCommand updateMemberCommand = new UpdateMemberCommand(
                 identifyNumber,
                 request.email(),
                 request.resetPassword(),
                 request.role()
         );
-        model.addAttribute("member", UpdateMemberRequest.from(updatedMemberResult.member()));
-        String temporalPassword = updatedMemberResult.temporalPassword();
+        MemberDto updatedMember = memberService.updateMember(updateMemberCommand);
+        String temporalPassword = updatedMember.password();
         String temporalPasswordInstruction = temporalPassword != null && !temporalPassword.isEmpty()
                 ? "\nTemporary password: " + temporalPassword
                 : "";

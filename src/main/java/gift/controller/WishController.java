@@ -2,9 +2,10 @@ package gift.controller;
 
 import gift.dto.AddWishRequest;
 import gift.dto.AuthenticatedMember;
+import gift.dto.NewWishCommand;
 import gift.dto.PageResponse;
+import gift.dto.WishDto;
 import gift.dto.WishResponse;
-import gift.entity.Wish;
 import gift.service.WishService;
 import gift.validator.LoginMember;
 import jakarta.validation.Valid;
@@ -35,7 +36,7 @@ public class WishController {
             @LoginMember AuthenticatedMember member,
             Pageable pageable
     ) {
-        Page<Wish> wishPage = wishService.getWishListByMemberId(member.id(), pageable);
+        Page<WishDto> wishPage = wishService.getWishListByMemberId(member.id(), pageable);
         Page<WishResponse> wishResponsePage = wishPage.map(wish -> WishResponse.from(wish));
         PageResponse<WishResponse> pageResponse = PageResponse.from(wishResponsePage);
         return ResponseEntity
@@ -48,10 +49,11 @@ public class WishController {
             @LoginMember AuthenticatedMember member,
             @RequestBody @Valid AddWishRequest request
     ) {
-        Wish created = wishService.addWishItem(member.id(), request.productId());
+        NewWishCommand wishCommand = new NewWishCommand(member.id(), request.productId());
+        WishDto created = wishService.addWishItem(wishCommand);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .header("Location", "/api/wish/" + created.getId())
+                .header("Location", "/api/wish/" + created.id())
                 .body(WishResponse.from(created));
     }
 

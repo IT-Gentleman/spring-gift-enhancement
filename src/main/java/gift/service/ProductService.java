@@ -1,9 +1,11 @@
 package gift.service;
 
+import gift.dto.NewProductCommand;
+import gift.dto.ProductDto;
+import gift.dto.UpdateProductCommand;
 import gift.entity.Product;
 import gift.exception.NotFoundException;
 import gift.repository.ProductRepository;
-import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,50 +21,59 @@ public class ProductService {
     }
 
     @Transactional
-    public Product createProduct(String name, Integer price, String imageUrl) {
-        Product product = new Product(name, price, imageUrl);
-        return productRepository.save(product);
+    public ProductDto createProduct(NewProductCommand command) {
+        Product product = new Product(command.name(), command.price(), command.imageUrl());
+        return ProductDto.from(productRepository.save(product));
     }
 
     // for normal users
     @Transactional(readOnly = true)
-    public Product getProductById(Long id) {
-        Optional<Product> optionalProduct = productRepository.findByIdAndDeletedIsFalse(id);
-        if (optionalProduct.isEmpty()) {
-            throw new NotFoundException("Product not found");
-        }
-        return optionalProduct.get();
+    public ProductDto getProductById(Long id) {
+        Product product = findProductByIdAndNotDeleted(id);
+        return ProductDto.from(product);
     }
 
     // for md users
     @Transactional(readOnly = true)
-    public Product getProductWhetherDeletedById(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Product not found"));
+    public ProductDto getProductWhetherDeletedById(Long id) {
+        Product product = findProductByIdIncludingDeleted(id);
+        return ProductDto.from(product);
     }
 
     // TODO : validated T/F로 나누지 말고, 위 처럼 whetherDeleted로 나누는 걸로 변경 (findAll 사용)
     @Transactional(readOnly = true)
-    public Page<Product> getProductList(Boolean validated, Pageable pageable) {
-        return productRepository.findAllByDeletedIsFalseAndValidated(validated, pageable);
+    public Page<ProductDto> getProductList(Boolean validated, Pageable pageable) {
+        Page<Product> pageProduct = productRepository.findAllByDeletedIsFalseAndValidated(validated,
+                pageable);
+        return pageProduct.map(ProductDto::from);
     }
 
     @Transactional
-    public Product updateProductById(Long id, String name, Integer price, String imageUrl) {
-        Product product = getProductById(id);
-        product.applyPatch(name, price, imageUrl);
-        return product;
+    public ProductDto updateProductById(UpdateProductCommand command) {
+        Product product = findProductByIdAndNotDeleted(command.id());
+        product.applyPatch(command.name(), command.price(), command.imageUrl());
+        return ProductDto.from(product);
     }
 
     @Transactional
     public void setProductValidated(Long id, Boolean validated) {
-        Product product = getProductById(id);
+        Product product = findProductByIdAndNotDeleted(id);
         product.setValidated(validated);
     }
 
     @Transactional
     public void softDeleteProductById(Long id) {
-        Product product = getProductById(id);
+        Product product = findProductByIdAndNotDeleted(id);
         product.setDeleted(true);
+    }
+
+    protected Product findProductByIdAndNotDeleted(Long id) {
+        return productRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException("Product not found"));
+    }
+
+    protected Product findProductByIdIncludingDeleted(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product not found"));
     }
 }

@@ -1,10 +1,12 @@
 package gift.controller;
 
 import gift.dto.CreateProductRequest;
+import gift.dto.NewProductCommand;
 import gift.dto.PageResponse;
 import gift.dto.PatchProductRequest;
+import gift.dto.ProductDto;
 import gift.dto.ProductResponse;
-import gift.entity.Product;
+import gift.dto.UpdateProductCommand;
 import gift.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -34,31 +36,32 @@ public class ProductController {
     public ResponseEntity<ProductResponse> createProduct(
             @Valid @RequestBody CreateProductRequest request
     ) {
-        Product created = productService.createProduct(
+        NewProductCommand command = new NewProductCommand(
                 request.name(),
                 request.price(),
                 request.imageUrl()
         );
+        ProductDto dto = productService.createProduct(command);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .header("Location", "/api/products/" + created.getId())
-                .body(ProductResponse.from(created));
+                .header("Location", "/api/products/" + dto.id())
+                .body(ProductResponse.from(dto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductById(
             @PathVariable Long id
     ) {
-        Product product = productService.getProductById(id);
+        ProductDto dto = productService.getProductById(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ProductResponse.from(product));
+                .body(ProductResponse.from(dto));
     }
 
     @GetMapping
     public ResponseEntity<PageResponse<ProductResponse>> getAllProducts(Pageable pageable) {
-        Page<Product> products = productService.getProductList(true, pageable);
-        Page<ProductResponse> response = products.map(ProductResponse::from);
+        Page<ProductDto> pagedDto = productService.getProductList(true, pageable);
+        Page<ProductResponse> response = pagedDto.map(ProductResponse::from);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(PageResponse.from(response));
@@ -69,16 +72,17 @@ public class ProductController {
             @PathVariable Long id,
             @Valid @RequestBody PatchProductRequest patch
     ) {
-        Product product = productService.updateProductById(
+        UpdateProductCommand command = new UpdateProductCommand(
                 id,
                 patch.name(),
                 patch.price(),
                 patch.imageUrl()
         );
+        ProductDto dto = productService.updateProductById(command);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ProductResponse.from(product));
+                .body(ProductResponse.from(dto));
     }
 
     @DeleteMapping("/{id}")

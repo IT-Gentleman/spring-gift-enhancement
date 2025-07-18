@@ -1,5 +1,6 @@
 package gift.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,7 +40,7 @@ class LoginAdminPageControllerTest {
         String email = "hello@world.com";
         String password = "password123456789";
         String expectedToken = "dummy-jwt-token";
-        when(memberService.login(email, password)).thenReturn(expectedToken);
+        when(memberService.login(any())).thenReturn(expectedToken);
 
         mockMvc.perform(post("/admin/login")
                         .param("email", email)
