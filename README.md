@@ -111,7 +111,7 @@
       개선 ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2212756571))
     - 코드
       단순화 ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213658541))
-- [ ] 기존 WishItem 명시된 Dto 명칭 변경 (`*WishItem*` -> `*Wish*`)
+- [x] 기존 WishItem 명시된 Dto 명칭 변경 (`*WishItem*` -> `*Wish*`)
 - [ ] Controller 레이어와 Service 레이어 간 데이터 전송 시 Dto 사용
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2212749414))
     - Controller -> Service : `객체명 Command Dto` 사용

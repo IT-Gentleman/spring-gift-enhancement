@@ -3,9 +3,9 @@ package gift.e2e;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import gift.dto.AddWishItemRequest;
+import gift.dto.AddWishRequest;
 import gift.dto.PageResponse;
-import gift.dto.WishItemResponse;
+import gift.dto.WishResponse;
 import gift.entity.Member;
 import gift.entity.Product;
 import gift.entity.Role;
@@ -83,7 +83,7 @@ public class WishE2ETest {
         void 위시리스트_조회_시_200_OK() {
             wishRepository.save(new Wish(savedUser, savedProduct1));
 
-            ResponseEntity<PageResponse<WishItemResponse>> response = restClient.get()
+            ResponseEntity<PageResponse<WishResponse>> response = restClient.get()
                     .uri(url)
                     .header("Authorization", "Bearer " + userToken)
                     .retrieve()
@@ -117,14 +117,14 @@ public class WishE2ETest {
         @Test
         @DisplayName("POST /api/wishes - 유효한 아이템 추가 시 201 CREATED")
         void 유효한_아이템_추가_시_201_CREATED() {
-            AddWishItemRequest request = new AddWishItemRequest(savedProduct1.getId());
+            AddWishRequest request = new AddWishRequest(savedProduct1.getId());
 
-            ResponseEntity<WishItemResponse> response = restClient.post()
+            ResponseEntity<WishResponse> response = restClient.post()
                     .uri(url)
                     .header("Authorization", "Bearer " + userToken)
                     .body(request)
                     .retrieve()
-                    .toEntity(WishItemResponse.class);
+                    .toEntity(WishResponse.class);
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
             assertThat(response.getBody()).isNotNull();
@@ -134,14 +134,14 @@ public class WishE2ETest {
         @Test
         @DisplayName("POST /api/wishes - 유효하지 않은 아이템 추가 시 404 NOT_FOUND")
         void 유효하지_않은_아이템_추가_시_404_NOT_FOUND() {
-            AddWishItemRequest request = new AddWishItemRequest(9999L);
+            AddWishRequest request = new AddWishRequest(9999L);
             assertThatExceptionOfType(HttpClientErrorException.NotFound.class)
                     .isThrownBy(() -> restClient.post()
                             .uri(url)
                             .header("Authorization", "Bearer " + userToken)
                             .body(request)
                             .retrieve()
-                            .toEntity(WishItemResponse.class));
+                            .toEntity(WishResponse.class));
         }
 
         @Test
@@ -149,7 +149,7 @@ public class WishE2ETest {
         void 이미_존재하는_아이템_추가_시_409_CONFLICT() {
             // 첫 번째 추가
             wishRepository.save(new Wish(savedUser, savedProduct1));
-            AddWishItemRequest request = new AddWishItemRequest(savedProduct1.getId());
+            AddWishRequest request = new AddWishRequest(savedProduct1.getId());
 
             // 두 번째 추가 시도
             assertThatExceptionOfType(HttpClientErrorException.Conflict.class)
@@ -158,7 +158,7 @@ public class WishE2ETest {
                             .header("Authorization", "Bearer " + userToken)
                             .body(request)
                             .retrieve()
-                            .toEntity(WishItemResponse.class));
+                            .toEntity(WishResponse.class));
         }
 
         @Test

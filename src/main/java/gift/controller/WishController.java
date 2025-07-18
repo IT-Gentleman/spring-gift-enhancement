@@ -1,9 +1,9 @@
 package gift.controller;
 
-import gift.dto.AddWishItemRequest;
+import gift.dto.AddWishRequest;
 import gift.dto.AuthenticatedMember;
 import gift.dto.PageResponse;
-import gift.dto.WishItemResponse;
+import gift.dto.WishResponse;
 import gift.entity.Wish;
 import gift.service.WishService;
 import gift.validator.LoginMember;
@@ -31,28 +31,28 @@ public class WishController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<WishItemResponse>> getWishList(
+    public ResponseEntity<PageResponse<WishResponse>> getWishList(
             @LoginMember AuthenticatedMember member,
             Pageable pageable
     ) {
         Page<Wish> wishPage = wishService.getWishListByMemberId(member.id(), pageable);
-        Page<WishItemResponse> wishResponsePage = wishPage.map(wish -> WishItemResponse.from(wish));
-        PageResponse<WishItemResponse> pageResponse = PageResponse.from(wishResponsePage);
+        Page<WishResponse> wishResponsePage = wishPage.map(wish -> WishResponse.from(wish));
+        PageResponse<WishResponse> pageResponse = PageResponse.from(wishResponsePage);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(pageResponse);
     }
 
     @PostMapping
-    public ResponseEntity<WishItemResponse> addWishItem(
+    public ResponseEntity<WishResponse> addWishItem(
             @LoginMember AuthenticatedMember member,
-            @RequestBody @Valid AddWishItemRequest request
+            @RequestBody @Valid AddWishRequest request
     ) {
         Wish created = wishService.addWishItem(member.id(), request.productId());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .header("Location", "/api/wish/" + created.getId())
-                .body(WishItemResponse.from(created));
+                .body(WishResponse.from(created));
     }
 
     @DeleteMapping("/{wishItemId}")

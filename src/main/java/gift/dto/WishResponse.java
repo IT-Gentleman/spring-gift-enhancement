@@ -3,7 +3,7 @@ package gift.dto;
 import gift.entity.Wish;
 import java.time.LocalDateTime;
 
-public record WishItemResponse(
+public record WishResponse(
         Long id,
         Long productId,
         String productName,
@@ -12,8 +12,8 @@ public record WishItemResponse(
         LocalDateTime addedAt
 ) {
 
-    public static WishItemResponse from(Wish wish) {
-        return new WishItemResponse(
+    public static WishResponse from(Wish wish) {
+        return new WishResponse(
                 wish.getId(),
                 wish.getProduct().getId(),
                 wish.getProduct().getName(),
