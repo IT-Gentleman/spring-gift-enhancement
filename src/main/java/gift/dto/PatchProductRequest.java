@@ -18,4 +18,5 @@ public record PatchProductRequest(
         @Size(min = 0, max = 255, message = "상품 이미지 URL은 255자 이내여야 합니다.")
         String imageUrl
 ) {
+
 }

@@ -4,6 +4,7 @@ import gift.dto.ErrorResponse;
 import gift.exception.ConflictException;
 import gift.exception.InvalidCredentialsException;
 import gift.exception.NotFoundException;
+import java.util.stream.Collectors;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -12,14 +13,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.stream.Collectors;
-
 @RestControllerAdvice
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class GlobalRestControllerExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String errorMessages = ex.getBindingResult().getFieldErrors().stream()
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())

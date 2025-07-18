@@ -23,9 +23,11 @@ public record CreateProductRequest(
         @Size(min = 0, max = 255, message = "상품 이미지 URL은 255자 이내여야 합니다.")
         String imageUrl
 ) {
+
     public static CreateProductRequest empty() {
         return new CreateProductRequest("", 1, "");
     }
+
     public static CreateProductRequest from(Product product) {
         return new CreateProductRequest(
                 product.getName(),

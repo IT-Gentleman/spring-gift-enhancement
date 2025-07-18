@@ -23,9 +23,11 @@ public record UpdateProductRequest(
         @Size(min = 0, max = 255, message = "상품 이미지 URL은 255자 이내여야 합니다.")
         String imageUrl
 ) {
+
     public static UpdateProductRequest empty() {
         return new UpdateProductRequest("", 1, "");
     }
+
     public static UpdateProductRequest from(Product product) {
         return new UpdateProductRequest(
                 product.getName(),

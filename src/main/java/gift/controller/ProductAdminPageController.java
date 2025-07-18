@@ -1,21 +1,28 @@
 package gift.controller;
 
 import gift.dto.CreateProductRequest;
-import gift.dto.ProductResponse;
 import gift.dto.PageResponse;
+import gift.dto.ProductResponse;
 import gift.dto.UpdateProductRequest;
 import gift.entity.Product;
 import gift.service.ProductService;
 import jakarta.validation.Valid;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/products")
@@ -29,9 +36,9 @@ public class ProductAdminPageController {
 
     @GetMapping
     public String getProducts(
-        @RequestParam(defaultValue = "true", required = false) Boolean validated,
-        Pageable pageable,
-        Model model
+            @RequestParam(defaultValue = "true", required = false) Boolean validated,
+            Pageable pageable,
+            Model model
     ) {
         Page<Product> products = productService.getProductList(validated, pageable);
         Page<ProductResponse> response = products.map(ProductResponse::from);
@@ -51,34 +58,35 @@ public class ProductAdminPageController {
     // 신규상품 등록 form 받고, 검증 및 redirection 수행
     @PostMapping
     public String newProduct(
-        @Valid @ModelAttribute CreateProductRequest request,
-        BindingResult bindingResult,
-        Model model,
-        RedirectAttributes redirectAttributes
+            @Valid @ModelAttribute CreateProductRequest request,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("productId", null);
             model.addAttribute("product", request);
             String errorMessages = bindingResult.getFieldErrors().stream()
-                .map(error -> "- " + error.getDefaultMessage())
-                .collect(Collectors.joining("\n"));
+                    .map(error -> "- " + error.getDefaultMessage())
+                    .collect(Collectors.joining("\n"));
             model.addAttribute("message", "Invalid input. Check again.\n" + errorMessages);
             return "admin/product-form";
         }
         Product created = productService.createProduct(
-            request.name(),
-            request.price(),
-            request.imageUrl()
+                request.name(),
+                request.price(),
+                request.imageUrl()
         );
-        redirectAttributes.addFlashAttribute("message", writeMessageWithValidated("Product created", created.isValidated()));
+        redirectAttributes.addFlashAttribute("message",
+                writeMessageWithValidated("Product created", created.isValidated()));
         return "redirect:/admin/products/" + created.getId();
     }
 
     @PatchMapping("/{id}")
     public String setProductValidated(
-        @PathVariable Long id,
-        @RequestParam Boolean validated,
-        RedirectAttributes redirectAttributes
+            @PathVariable Long id,
+            @RequestParam Boolean validated,
+            RedirectAttributes redirectAttributes
     ) {
         productService.setProductValidated(id, validated);
         redirectAttributes.addFlashAttribute("message", "Product Validated Status Changed");
@@ -87,8 +95,8 @@ public class ProductAdminPageController {
 
     @GetMapping("/{id}")
     public String getProduct(
-        @PathVariable Long id,
-        Model model
+            @PathVariable Long id,
+            Model model
     ) {
         Product product = productService.getProductWhetherDeletedById(id);
         UpdateProductRequest dto = UpdateProductRequest.from(product);
@@ -103,24 +111,25 @@ public class ProductAdminPageController {
 
     @PutMapping("/{id}")
     public String updateProduct(
-        @PathVariable Long id,
-        @Valid @ModelAttribute UpdateProductRequest request,
-        BindingResult bindingResult,
-        Model model,
-        RedirectAttributes redirectAttributes
+            @PathVariable Long id,
+            @Valid @ModelAttribute UpdateProductRequest request,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
             Product originalProduct = productService.getProductWhetherDeletedById(id);
             model.addAttribute("productId", id);
             model.addAttribute("validated", originalProduct.isValidated());
             if (originalProduct.isDeleted()) {
-                model.addAttribute("message", "This product has been deleted and cannot be modified.");
+                model.addAttribute("message",
+                        "This product has been deleted and cannot be modified.");
                 model.addAttribute("product", UpdateProductRequest.from(originalProduct));
                 model.addAttribute("deleted", true);
             } else {
                 String errorMessages = bindingResult.getFieldErrors().stream()
-                    .map(error -> "- " + error.getDefaultMessage())
-                    .collect(Collectors.joining("\n"));
+                        .map(error -> "- " + error.getDefaultMessage())
+                        .collect(Collectors.joining("\n"));
                 model.addAttribute("message", "Invalid input. Check again.\n" + errorMessages);
                 model.addAttribute("product", request);
                 model.addAttribute("deleted", false);
@@ -133,14 +142,15 @@ public class ProductAdminPageController {
                 request.price(),
                 request.imageUrl()
         );
-        redirectAttributes.addFlashAttribute("message", writeMessageWithValidated("Product updated", updated.isValidated()));
+        redirectAttributes.addFlashAttribute("message",
+                writeMessageWithValidated("Product updated", updated.isValidated()));
         return "redirect:/admin/products/" + id;
     }
 
     @DeleteMapping("/{id}")
     public String deleteProduct(
-        @PathVariable Long id,
-        RedirectAttributes redirectAttributes
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes
     ) {
         productService.softDeleteProductById(id);
         redirectAttributes.addFlashAttribute("message", "Product deleted");

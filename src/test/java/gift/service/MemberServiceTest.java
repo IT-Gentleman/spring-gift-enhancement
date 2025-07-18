@@ -1,5 +1,12 @@
 package gift.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
 import gift.dto.UpdateMemberResponse;
 import gift.entity.Member;
 import gift.entity.Role;
@@ -8,6 +15,7 @@ import gift.exception.InvalidCredentialsException;
 import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
 import gift.util.BCryptEncryptor;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,13 +25,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
@@ -57,7 +58,8 @@ class MemberServiceTest {
 
             try (MockedStatic<BCryptEncryptor> encryptor = mockStatic(BCryptEncryptor.class)) {
 
-                encryptor.when(() -> BCryptEncryptor.encrypt(rawPassword)).thenReturn(hashedPassword);
+                encryptor.when(() -> BCryptEncryptor.encrypt(rawPassword))
+                        .thenReturn(hashedPassword);
                 when(memberRepository.save(any(Member.class))).thenReturn(expectedMember);
 
                 Member resolve = memberService.createMember(email, rawPassword);
@@ -77,9 +79,11 @@ class MemberServiceTest {
             String email = "existing@email.com";
             String rawPassword = "password123456789";
 
-            when(memberRepository.findByEmail(email)).thenReturn(Optional.of(new Member(100L, email, "hashedPassword", null)));
+            when(memberRepository.findByEmail(email)).thenReturn(
+                    Optional.of(new Member(100L, email, "hashedPassword", null)));
 
-            assertThrows(ConflictException.class, () -> memberService.createMember(email, rawPassword));
+            assertThrows(ConflictException.class,
+                    () -> memberService.createMember(email, rawPassword));
         }
     }
 
@@ -99,7 +103,8 @@ class MemberServiceTest {
 
             try (MockedStatic<BCryptEncryptor> encryptor = mockStatic(BCryptEncryptor.class)) {
 
-                encryptor.when(() -> BCryptEncryptor.matches(rawPassword, hashedPassword)).thenReturn(true);
+                encryptor.when(() -> BCryptEncryptor.matches(rawPassword, hashedPassword))
+                        .thenReturn(true);
                 when(jwtTokenProvider.createToken(existingMember)).thenReturn("validToken");
 
                 String token = memberService.login(email, rawPassword);
@@ -117,7 +122,8 @@ class MemberServiceTest {
 
             when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-            assertThrows(InvalidCredentialsException.class, () -> memberService.login(email, rawPassword));
+            assertThrows(InvalidCredentialsException.class,
+                    () -> memberService.login(email, rawPassword));
         }
 
         @Test
@@ -133,9 +139,11 @@ class MemberServiceTest {
 
             try (MockedStatic<BCryptEncryptor> encryptor = mockStatic(BCryptEncryptor.class)) {
 
-                encryptor.when(() -> BCryptEncryptor.matches(rawPassword, hashedPassword)).thenReturn(false);
+                encryptor.when(() -> BCryptEncryptor.matches(rawPassword, hashedPassword))
+                        .thenReturn(false);
 
-                assertThrows(InvalidCredentialsException.class, () -> memberService.login(email, rawPassword));
+                assertThrows(InvalidCredentialsException.class,
+                        () -> memberService.login(email, rawPassword));
             }
         }
     }
@@ -158,7 +166,8 @@ class MemberServiceTest {
             when(memberRepository.findById(id)).thenReturn(Optional.of(existingMember));
             when(memberRepository.findByEmail(newEmail)).thenReturn(Optional.empty());
 
-            UpdateMemberResponse result = memberService.updateSelectivelyMember(id, newEmail, false, newRole);
+            UpdateMemberResponse result = memberService.updateSelectivelyMember(id, newEmail, false,
+                    newRole);
 
             assertAll(
                     () -> assertThat(result.member().getId()).isEqualTo(id),
@@ -187,7 +196,8 @@ class MemberServiceTest {
             try (MockedStatic<BCryptEncryptor> encryptor = mockStatic(BCryptEncryptor.class)) {
                 encryptor.when(() -> BCryptEncryptor.encrypt(any())).thenReturn(newPassword);
 
-                UpdateMemberResponse result = memberService.updateSelectivelyMember(id, newEmail, true, newRole);
+                UpdateMemberResponse result = memberService.updateSelectivelyMember(id, newEmail,
+                        true, newRole);
 
                 assertAll(
                         () -> assertThat(result.member().getId()).isEqualTo(id),
@@ -226,7 +236,8 @@ class MemberServiceTest {
         void 유효하지_않은_토큰으로_인증정보조회시_예외발생() {
             String token = "validToken";
             when(jwtTokenProvider.validateToken(token)).thenReturn(false);
-            assertThrows(ResponseStatusException.class, () -> memberService.getAuthenticationFromToken(token));
+            assertThrows(ResponseStatusException.class,
+                    () -> memberService.getAuthenticationFromToken(token));
         }
 
         @Test
@@ -237,7 +248,8 @@ class MemberServiceTest {
             when(jwtTokenProvider.validateToken(token)).thenReturn(true);
             when(jwtTokenProvider.getUsername(token)).thenReturn(username);
             when(memberRepository.findByEmail(username)).thenReturn(Optional.empty());
-            assertThrows(ResponseStatusException.class, () -> memberService.getAuthenticationFromToken(token));
+            assertThrows(ResponseStatusException.class,
+                    () -> memberService.getAuthenticationFromToken(token));
         }
     }
 }

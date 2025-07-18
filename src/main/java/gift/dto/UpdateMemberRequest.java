@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 
 // for Admin Page. Authority is required.
-public record UpdateMemberRequest (
+public record UpdateMemberRequest(
         @NotNull(message = "회원 id는 제시되어야합니다.")
         Long id,
 
@@ -21,12 +21,13 @@ public record UpdateMemberRequest (
         @NotNull(message = "권한은 제시되어야합니다.")
         Role role
 ) {
-        public static UpdateMemberRequest from(Member member) {
-                return new UpdateMemberRequest(
-                        member.getId(),
-                        member.getEmail(),
-                        false,
-                        member.getRole()
-                );
-        }
+
+    public static UpdateMemberRequest from(Member member) {
+        return new UpdateMemberRequest(
+                member.getId(),
+                member.getEmail(),
+                false,
+                member.getRole()
+        );
+    }
 }

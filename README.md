@@ -103,7 +103,7 @@
 
 #### [refactor]
 
-- [ ] 코드 시각적 리팩토링
+- [x] 코드 시각적 리팩토링
     - Google Code Style
       적용 ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2212686575))
         - 와일드카드 없는 import문 사용과 들여쓰기 규칙 등

@@ -1,5 +1,10 @@
 package gift.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import gift.entity.Member;
 import gift.entity.Role;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,9 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class MemberRepositoryTest {
@@ -24,12 +26,12 @@ class MemberRepositoryTest {
     @BeforeEach
     void setUp() {
         existingMember = memberRepository.save(
-            new Member(
-                null,
-                "existing@kakao.com",
-                "existingEncryptedPassword",
-                Role.ROLE_USER
-            )
+                new Member(
+                        null,
+                        "existing@kakao.com",
+                        "existingEncryptedPassword",
+                        Role.ROLE_USER
+                )
         );
     }
 
@@ -41,10 +43,10 @@ class MemberRepositoryTest {
         @DisplayName("정상적인 멤버 데이터 삽입")
         void 정상적인_멤버_삽입_시_정상반환() {
             Member exampleMember = new Member(
-                null,
-                "example@email.com",
-                "encryptedPasswordByBCryptEncryptor",
-                Role.ROLE_USER
+                    null,
+                    "example@email.com",
+                    "encryptedPasswordByBCryptEncryptor",
+                    Role.ROLE_USER
             );
             Member savedMember = memberRepository.save(exampleMember);
             assertAll(
@@ -74,16 +76,24 @@ class MemberRepositoryTest {
             // identifyNumber는 항상 null인 상태로 삽입되어야 함
 
             Member allNullMember = new Member(null, null, null, null);
-            assertThrows(DataIntegrityViolationException.class, () -> memberRepository.save(allNullMember));
+            assertThrows(DataIntegrityViolationException.class,
+                    () -> memberRepository.save(allNullMember));
 
-            Member emailNullMember = new Member(null, null, "encryptedPasswordByBCryptEncryptor", Role.ROLE_USER);
-            assertThrows(DataIntegrityViolationException.class, () -> memberRepository.save(emailNullMember));new Member(null, "example@email.com", "encryptedPasswordByBCryptEncryptor", Role.ROLE_USER);
+            Member emailNullMember = new Member(null, null, "encryptedPasswordByBCryptEncryptor",
+                    Role.ROLE_USER);
+            assertThrows(DataIntegrityViolationException.class,
+                    () -> memberRepository.save(emailNullMember));
+            new Member(null, "example@email.com", "encryptedPasswordByBCryptEncryptor",
+                    Role.ROLE_USER);
 
             Member passwordNullMember = new Member(null, "example@email.com", null, Role.ROLE_USER);
-            assertThrows(DataIntegrityViolationException.class, () -> memberRepository.save(passwordNullMember));
+            assertThrows(DataIntegrityViolationException.class,
+                    () -> memberRepository.save(passwordNullMember));
 
-            Member authorityNullMember = new Member(null, "example@email.com", "encryptedPasswordByBCryptEncryptor", null);
-            assertThrows(DataIntegrityViolationException.class, () -> memberRepository.save(authorityNullMember));
+            Member authorityNullMember = new Member(null, "example@email.com",
+                    "encryptedPasswordByBCryptEncryptor", null);
+            assertThrows(DataIntegrityViolationException.class,
+                    () -> memberRepository.save(authorityNullMember));
         }
     }
 
@@ -144,7 +154,7 @@ class MemberRepositoryTest {
 
     private boolean memberDetailsEquals(Member member1, Member member2) {
         return member1.getEmail().equals(member2.getEmail())
-            && member1.getPassword().equals(member2.getPassword())
-            && member1.getRole().equals(member2.getRole());
+                && member1.getPassword().equals(member2.getPassword())
+                && member1.getRole().equals(member2.getRole());
     }
 }

@@ -1,7 +1,6 @@
 package gift.dto;
 
 import gift.entity.Wish;
-
 import java.time.LocalDateTime;
 
 public record WishItemResponse(
@@ -12,6 +11,7 @@ public record WishItemResponse(
         Boolean deleted,
         LocalDateTime addedAt
 ) {
+
     public static WishItemResponse from(Wish wish) {
         return new WishItemResponse(
                 wish.getId(),

@@ -1,11 +1,16 @@
 package gift.entity;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 
 @Entity
 public class Wish {
+
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
@@ -21,7 +26,8 @@ public class Wish {
     @Column(name = "added_at", nullable = false)
     private LocalDateTime addedAt;
 
-    protected Wish() {}
+    protected Wish() {
+    }
 
     // Constructor for wish creation (and its test code)
     public Wish(Member member, Product product) {

@@ -1,10 +1,13 @@
 package gift.filter;
 
 import gift.entity.Role;
-import jakarta.servlet.*;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -12,7 +15,8 @@ import java.util.Arrays;
 public class AuthorizationFilter implements Filter {
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
@@ -99,7 +103,7 @@ public class AuthorizationFilter implements Filter {
 
     private boolean hasAnyRole(String userRole, Role... requiredRoles) {
         return isAuthenticated(userRole)
-            && Arrays.stream(requiredRoles).anyMatch(r -> userRole.equals(r.name()));
+                && Arrays.stream(requiredRoles).anyMatch(r -> userRole.equals(r.name()));
     }
 
     private void sendError(HttpServletResponse httpResponse, String role) throws IOException {

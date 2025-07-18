@@ -1,5 +1,8 @@
 package gift.e2e;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import gift.dto.AddWishItemRequest;
 import gift.dto.PageResponse;
 import gift.dto.WishItemResponse;
@@ -11,7 +14,11 @@ import gift.repository.MemberRepository;
 import gift.repository.ProductRepository;
 import gift.repository.WishRepository;
 import gift.token.JwtTokenProvider;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -20,9 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class WishE2ETest {
@@ -51,11 +55,14 @@ public class WishE2ETest {
     void setUp() {
         restClient = RestClient.create();
 
-        savedUser = memberRepository.save(new Member(null, "user@example.com", "password123456789", Role.ROLE_USER));
+        savedUser = memberRepository.save(
+                new Member(null, "user@example.com", "password123456789", Role.ROLE_USER));
         userToken = jwtTokenProvider.createToken(savedUser);
 
-        savedProduct1 = productRepository.save(new Product(null, "Product 1", 1000, "prod1.jpg", true, false));
-        savedProduct2 = productRepository.save(new Product(null, "Product 2", 2000, "prod2.jpg", true, false));
+        savedProduct1 = productRepository.save(
+                new Product(null, "Product 1", 1000, "prod1.jpg", true, false));
+        savedProduct2 = productRepository.save(
+                new Product(null, "Product 2", 2000, "prod2.jpg", true, false));
     }
 
     @AfterEach
@@ -68,6 +75,7 @@ public class WishE2ETest {
     @Nested
     @DisplayName("GET /api/wishes - 위시리스트 조회 테스트")
     class GetWishList {
+
         String url = baseUrl + port + "/api/wishes";
 
         @Test
@@ -79,7 +87,8 @@ public class WishE2ETest {
                     .uri(url)
                     .header("Authorization", "Bearer " + userToken)
                     .retrieve()
-                    .toEntity(new ParameterizedTypeReference<>() {});
+                    .toEntity(new ParameterizedTypeReference<>() {
+                    });
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
@@ -94,13 +103,15 @@ public class WishE2ETest {
                     .isThrownBy(() -> restClient.get()
                             .uri(url)
                             .retrieve()
-                            .toEntity(new ParameterizedTypeReference<RestPage<Wish>>() {}));
+                            .toEntity(new ParameterizedTypeReference<PageResponse<Wish>>() {
+                            }));
         }
     }
 
     @Nested
     @DisplayName("POST /api/wishes - 위시리스트 아이템 추가 테스트")
     class PostWish {
+
         String url = baseUrl + port + "/api/wishes";
 
         @Test
@@ -157,13 +168,15 @@ public class WishE2ETest {
                     .isThrownBy(() -> restClient.get()
                             .uri(url)
                             .retrieve()
-                            .toEntity(new ParameterizedTypeReference<RestPage<Wish>>() {}));
+                            .toEntity(new ParameterizedTypeReference<PageResponse<Wish>>() {
+                            }));
         }
     }
 
     @Nested
     @DisplayName("DELETE /api/wishes/{wishItemId} - 위시리스트 아이템 삭제 테스트")
     class DeleteWish {
+
         String url = baseUrl + port + "/api/wishes";
 
         @Test
@@ -197,7 +210,6 @@ public class WishE2ETest {
             Member otherUser = memberRepository.save(new Member(null, "", "", Role.ROLE_USER));
             Wish otherUsersWish = wishRepository.save(new Wish(otherUser, savedProduct1));
 
-
             assertThatExceptionOfType(HttpClientErrorException.NotFound.class)
                     .isThrownBy(() -> restClient.delete()
                             .uri(url + "/" + otherUsersWish.getId())
@@ -213,7 +225,8 @@ public class WishE2ETest {
                     .isThrownBy(() -> restClient.get()
                             .uri(url)
                             .retrieve()
-                            .toEntity(new ParameterizedTypeReference<RestPage<Wish>>() {}));
+                            .toEntity(new ParameterizedTypeReference<PageResponse<Wish>>() {
+                            }));
         }
     }
 }

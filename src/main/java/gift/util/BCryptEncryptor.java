@@ -9,7 +9,7 @@ public class BCryptEncryptor {
     }
 
     public static boolean matches(String origin, String hashed) {
-        try{
+        try {
             return BCrypt.checkpw(origin, hashed);
         } catch (Exception e) {
             return false;

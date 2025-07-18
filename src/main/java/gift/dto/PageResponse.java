@@ -1,10 +1,9 @@
 package gift.dto;
 
+import java.util.List;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-
-public record PageResponse<T> (
+public record PageResponse<T>(
         // 실제 데이터
         List<T> content,
         // 페이지 정보 (thymeleaf에서 사용)
@@ -16,6 +15,7 @@ public record PageResponse<T> (
         boolean last,
         String sort
 ) {
+
     public static <T> PageResponse<T> from(Page<T> page) {
         return new PageResponse<>(
                 page.getContent(),

@@ -9,6 +9,7 @@ public record ProductResponse(
         String imageUrl,
         Boolean validated
 ) {
+
     public static ProductResponse from(Product product) {
         return new ProductResponse(
                 product.getId(),

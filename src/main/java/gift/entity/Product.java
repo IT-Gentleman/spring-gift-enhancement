@@ -1,7 +1,10 @@
 package gift.entity;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.List;
 
 @Entity
@@ -30,10 +33,12 @@ public class Product {
     private Boolean deleted = false;
 
     // non-argument constructor for JPA
-    protected Product() {}
+    protected Product() {
+    }
 
     // all arguments constructor for test code
-    public Product(Long id, String name, Integer price, String imageUrl, Boolean validated, Boolean deleted) {
+    public Product(Long id, String name, Integer price, String imageUrl, Boolean validated,
+            Boolean deleted) {
         this.id = id;
         this.name = name;
         this.price = price;

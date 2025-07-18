@@ -1,8 +1,14 @@
 package gift.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import gift.entity.Product;
 import gift.exception.NotFoundException;
 import gift.repository.ProductRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -10,15 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -49,8 +46,10 @@ class ProductServiceTest {
         @DisplayName("존재하는 상품 ID로 조회 시 상품 반환")
         void 존재하는상품ID로조회시_상품반환() {
             Long productId = 1L;
-            Product expectedProduct = new Product(productId, "Test Product", 10000, "http://example.com/image.jpg", false, false);
-            when(productRepository.findByIdAndDeletedIsFalse(productId)).thenReturn(Optional.of(expectedProduct));
+            Product expectedProduct = new Product(productId, "Test Product", 10000,
+                    "http://example.com/image.jpg", false, false);
+            when(productRepository.findByIdAndDeletedIsFalse(productId)).thenReturn(
+                    Optional.of(expectedProduct));
 
             assertThat(productService.getProductById(productId)).isEqualTo(expectedProduct);
         }
@@ -59,7 +58,8 @@ class ProductServiceTest {
         @DisplayName("존재하지 않는 상품 ID로 조회 시 예외 발생")
         void 존재하지않는상품ID로조회시_예외발생() {
             Long productId = 999L;
-            when(productRepository.findByIdAndDeletedIsFalse(productId)).thenReturn(Optional.empty());
+            when(productRepository.findByIdAndDeletedIsFalse(productId)).thenReturn(
+                    Optional.empty());
 
             assertThrows(NotFoundException.class, () -> productService.getProductById(productId));
         }
@@ -73,10 +73,12 @@ class ProductServiceTest {
         @DisplayName("존재하는 상품 ID로 조회 시 상품 반환")
         void 존재하는상품ID로조회시_상품반환() {
             Long productId = 1L;
-            Product expectedProduct = new Product(productId, "Test Product", 10000, "http://example.com/image.jpg", false, false);
+            Product expectedProduct = new Product(productId, "Test Product", 10000,
+                    "http://example.com/image.jpg", false, false);
             when(productRepository.findById(productId)).thenReturn(Optional.of(expectedProduct));
 
-            assertThat(productService.getProductWhetherDeletedById(productId)).isEqualTo(expectedProduct);
+            assertThat(productService.getProductWhetherDeletedById(productId)).isEqualTo(
+                    expectedProduct);
         }
 
         @Test
@@ -85,7 +87,8 @@ class ProductServiceTest {
             Long productId = 999L;
             when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-            assertThrows(NotFoundException.class, () -> productService.getProductWhetherDeletedById(productId));
+            assertThrows(NotFoundException.class,
+                    () -> productService.getProductWhetherDeletedById(productId));
         }
     }
 

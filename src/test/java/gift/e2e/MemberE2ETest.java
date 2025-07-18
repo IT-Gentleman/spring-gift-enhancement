@@ -1,22 +1,25 @@
 package gift.e2e;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import gift.dto.LoginMemberRequest;
 import gift.dto.LoginMemberResponse;
 import gift.dto.RegisterMemberRequest;
 import gift.dto.RegisterMemberResponse;
 import gift.repository.MemberRepository;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MemberE2ETest {
@@ -44,12 +47,14 @@ class MemberE2ETest {
     @Nested
     @DisplayName("POST /api/members/register - 회원가입 테스트")
     class Register {
+
         String url = baseUrl + port + "/api/members/register";
 
         @Test
         @DisplayName("POST /api/members/register - 유효한 정보 입력 시 201 CREATED")
         void 유효한_정보_입력_시_201_CREATED() {
-            RegisterMemberRequest request = new RegisterMemberRequest("test@example.com", "password123456789");
+            RegisterMemberRequest request = new RegisterMemberRequest("test@example.com",
+                    "password123456789");
 
             ResponseEntity<RegisterMemberResponse> response = restClient.post()
                     .uri(url)
@@ -64,7 +69,8 @@ class MemberE2ETest {
         @Test
         @DisplayName("POST /api/members/register - 이메일 중복 시 409 CONFLICT")
         void 이메일_중복_시_409_CONFLICT() {
-            RegisterMemberRequest request = new RegisterMemberRequest("existing@example.com", "password123456789");
+            RegisterMemberRequest request = new RegisterMemberRequest("existing@example.com",
+                    "password123456789");
 
             // 먼저 회원가입을 수행
             restClient.post()
@@ -86,33 +92,38 @@ class MemberE2ETest {
         @Test
         @DisplayName("POST /api/members/register - 비밀번호 길이 부족 시 400 BAD_REQUEST")
         void 비밀번호_길이_부족_시_400_BAD_REQUEST() {
-            RegisterMemberRequest request = new RegisterMemberRequest("test@example.com", "password");
+            RegisterMemberRequest request = new RegisterMemberRequest("test@example.com",
+                    "password");
             assertThatExceptionOfType(HttpClientErrorException.class)
                     .isThrownBy(() -> restClient.post()
                             .uri(url)
                             .body(request)
                             .retrieve()
                             .toBodilessEntity())
-                    .satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
+                    .satisfies(
+                            ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
         }
 
         @Test
         @DisplayName("POST /api/members/register - 잘못된 이메일 형식 시 400 BAD_REQUEST")
         void 잘못된_이메일_형식_시_400_BAD_REQUEST() {
-            RegisterMemberRequest request = new RegisterMemberRequest("invalid-email", "password123456789");
+            RegisterMemberRequest request = new RegisterMemberRequest("invalid-email",
+                    "password123456789");
             assertThatExceptionOfType(HttpClientErrorException.class)
                     .isThrownBy(() -> restClient.post()
                             .uri(url)
                             .body(request)
                             .retrieve()
                             .toBodilessEntity())
-                    .satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
+                    .satisfies(
+                            ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
         }
     }
 
     @Nested
     @DisplayName("POST /api/members/login - 로그인 테스트")
     class Login {
+
         String registerUrl = baseUrl + port + "/api/members/register";
         String loginUrl = baseUrl + port + "/api/members/login";
         String userEmail = "existing@example.com";
@@ -121,7 +132,8 @@ class MemberE2ETest {
         @BeforeEach
         void setUp() {
             // 테스트를 위해 유효한 회원을 먼저 생성
-            RegisterMemberRequest createRequest = new RegisterMemberRequest(userEmail, userPassword);
+            RegisterMemberRequest createRequest = new RegisterMemberRequest(userEmail,
+                    userPassword);
             restClient.post()
                     .uri(registerUrl)
                     .body(createRequest)
@@ -154,13 +166,15 @@ class MemberE2ETest {
                             .body(loginRequest)
                             .retrieve()
                             .toBodilessEntity())
-                    .satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
+                    .satisfies(
+                            ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
         }
 
         @Test
         @DisplayName("POST /api/members/login - 존재하지 않는 이메일로 로그인 시 403 FORBIDDEN")
         void 존재하지_않는_이메일로_로그인_시_403_FORBIDDEN() {
-            LoginMemberRequest loginRequest = new LoginMemberRequest("noexisting@example.com", userPassword);
+            LoginMemberRequest loginRequest = new LoginMemberRequest("noexisting@example.com",
+                    userPassword);
 
             assertThatExceptionOfType(HttpClientErrorException.class)
                     .isThrownBy(() -> restClient.post()
@@ -168,7 +182,8 @@ class MemberE2ETest {
                             .body(loginRequest)
                             .retrieve()
                             .toBodilessEntity())
-                    .satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
+                    .satisfies(
+                            ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
         }
     }
 }

@@ -11,14 +11,13 @@ import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
 import gift.util.BCryptEncryptor;
 import gift.util.PasswordUtility;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Optional;
 
 @Service
 public class MemberService {
@@ -43,7 +42,8 @@ public class MemberService {
     @Transactional(readOnly = true)
     public String login(String email, String rawPassword) {
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
-        if (optionalMember.isEmpty() || !BCryptEncryptor.matches(rawPassword, optionalMember.get().getPassword())) {
+        if (optionalMember.isEmpty() || !BCryptEncryptor.matches(rawPassword,
+                optionalMember.get().getPassword())) {
             throw new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
         return jwtTokenProvider.createToken(optionalMember.get());
@@ -61,7 +61,8 @@ public class MemberService {
     }
 
     @Transactional
-    public UpdateMemberResponse updateSelectivelyMember(Long id, String email, Boolean resetPassword, Role authority) {
+    public UpdateMemberResponse updateSelectivelyMember(Long id, String email,
+            Boolean resetPassword, Role authority) {
         // getMemberById는 readOnly=true이나, 이미 활성화된 Transaction(readOnly=false)에 참여하는 형태
         Member member = getMemberById(id);
         checkValidMemberUpdate(email, member.getId());

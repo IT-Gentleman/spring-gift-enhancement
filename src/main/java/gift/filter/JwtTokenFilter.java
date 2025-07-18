@@ -1,12 +1,15 @@
 package gift.filter;
 
 import gift.token.JwtTokenProvider;
-import jakarta.servlet.*;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.util.WebUtils;
-
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.web.util.WebUtils;
 
 // 1. extracting JWT Token from the request and validating it
 public class JwtTokenFilter implements Filter {
@@ -18,7 +21,8 @@ public class JwtTokenFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
         String token = Optional.ofNullable(getTokenFromCookies(httpRequest))

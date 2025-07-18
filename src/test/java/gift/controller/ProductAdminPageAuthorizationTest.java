@@ -1,21 +1,24 @@
 package gift.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import gift.entity.Member;
 import gift.entity.Role;
 import gift.repository.MemberRepository;
 import gift.token.JwtTokenProvider;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ProductAdminPageAuthorizationTest {
@@ -50,6 +53,7 @@ class ProductAdminPageAuthorizationTest {
     @Nested
     @DisplayName("GET /admin/products - 상품 목록 조회 테스트")
     class GetProductList {
+
         String url = baseUrl + port + "/admin/products";
 
         @Test
@@ -73,7 +77,8 @@ class ProductAdminPageAuthorizationTest {
                             .uri(url)
                             .retrieve()
                             .toBodilessEntity())
-                    .satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED));
+                    .satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(
+                            HttpStatus.UNAUTHORIZED));
         }
 
         @Test
@@ -94,7 +99,8 @@ class ProductAdminPageAuthorizationTest {
                             .header("Authorization", "Bearer " + userToken)
                             .retrieve()
                             .toBodilessEntity())
-                    .satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
+                    .satisfies(
+                            ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
         }
     }
 

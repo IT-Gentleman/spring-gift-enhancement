@@ -3,14 +3,11 @@ package gift.service;
 import gift.entity.Product;
 import gift.exception.NotFoundException;
 import gift.repository.ProductRepository;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -40,11 +37,8 @@ public class ProductService {
     // for md users
     @Transactional(readOnly = true)
     public Product getProductWhetherDeletedById(Long id) {
-        Optional<Product> optionalProduct = productRepository.findById(id);
-        if (optionalProduct.isEmpty()) {
-            throw new NotFoundException("Product not found");
-        }
-        return optionalProduct.get();
+        return productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product not found"));
     }
 
     // TODO : validated T/F로 나누지 말고, 위 처럼 whetherDeleted로 나누는 걸로 변경 (findAll 사용)

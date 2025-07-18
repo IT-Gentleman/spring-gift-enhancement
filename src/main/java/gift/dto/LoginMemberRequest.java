@@ -11,6 +11,7 @@ public record LoginMemberRequest(
         @NotNull(message = "비밀번호는 제시되어야합니다.")
         String password
 ) {
+
     public static LoginMemberRequest empty() {
         return new LoginMemberRequest("", "");
     }

@@ -1,5 +1,9 @@
 package gift.e2e;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import gift.dto.CreateProductRequest;
 import gift.dto.PageResponse;
 import gift.dto.ProductResponse;
@@ -23,10 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductE2ETest {
@@ -52,9 +52,11 @@ public class ProductE2ETest {
     @BeforeEach
     void setUp() {
         restClient = RestClient.create();
-        Member md = memberRepository.save(new Member(null, "md@example.com", "mdpassword123456789", Role.ROLE_MD));
+        Member md = memberRepository.save(
+                new Member(null, "md@example.com", "mdpassword123456789", Role.ROLE_MD));
         mdToken = jwtTokenProvider.createToken(md);
-        savedProduct = productRepository.save(new Product(null, "Initial Product", 10000, "initial.jpg", true, false));
+        savedProduct = productRepository.save(
+                new Product(null, "Initial Product", 10000, "initial.jpg", true, false));
     }
 
     @AfterEach
@@ -66,6 +68,7 @@ public class ProductE2ETest {
     @Nested
     @DisplayName("POST /api/products - 상품생성 테스트")
     class CreateProduct {
+
         String url = baseUrl + port + "/api/products";
 
         @Test
@@ -108,6 +111,7 @@ public class ProductE2ETest {
     @Nested
     @DisplayName("GET /api/products/{id} - 상품조회 테스트")
     class GetProduct {
+
         @Test
         @DisplayName("GET /api/products/{id} - 유효한 조회 시 200 OK")
         void 유효한_조회_시_200_OK() {
@@ -142,6 +146,7 @@ public class ProductE2ETest {
     @Nested
     @DisplayName("PATCH /api/products/{id} - 상품수정 테스트")
     class UpdateProduct {
+
         @Test
         @DisplayName("PATCH /api/products/{id} - 유효한 수정 시 200 OK")
         void 유효한_수정_시_200_OK() {
@@ -194,7 +199,8 @@ public class ProductE2ETest {
                 .uri(url)
                 .header("Authorization", "Bearer " + mdToken)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<>() {});
+                .toEntity(new ParameterizedTypeReference<>() {
+                });
 
         assertAll(
                 () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
@@ -205,6 +211,7 @@ public class ProductE2ETest {
     @Nested
     @DisplayName("DELETE /api/products/{id} - 상품삭제 테스트")
     class DeleteProduct {
+
         @Test
         @DisplayName("DELETE /api/products/{id} - 유효한 삭제 시 204 NO_CONTENT")
         void 유효한_삭제_시_204_NO_CONTENT() {

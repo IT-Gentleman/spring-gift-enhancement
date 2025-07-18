@@ -1,21 +1,21 @@
 package gift.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import gift.entity.Member;
 import gift.entity.Product;
 import gift.entity.Role;
 import gift.entity.Wish;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @DataJpaTest
 class WishRepositoryTest {
@@ -35,22 +35,22 @@ class WishRepositoryTest {
     @BeforeEach
     void setUp() {
         existingMember = memberRepository.save(
-            new Member(
-                null,
-                "existing@kakao.com",
-                "existingEncryptedPassword",
-                Role.ROLE_USER
-            )
+                new Member(
+                        null,
+                        "existing@kakao.com",
+                        "existingEncryptedPassword",
+                        Role.ROLE_USER
+                )
         );
         existingProduct = productRepository.save(
-            new Product(
-                null,
-                "existing product",
-                5000,
-                "http://image.com/existing.png",
-                true,
-                false
-            )
+                new Product(
+                        null,
+                        "existing product",
+                        5000,
+                        "http://image.com/existing.png",
+                        true,
+                        false
+                )
         );
     }
 
@@ -67,9 +67,11 @@ class WishRepositoryTest {
             );
             Wish savedWish = wishRepository.save(wish);
             assertAll(
-                () -> assertThat(savedWish.getId()).isNotNull(),
-                () -> assertThat(savedWish.getMember().getId()).isEqualTo(existingMember.getId()),
-                () -> assertThat(savedWish.getProduct().getId()).isEqualTo(existingProduct.getId())
+                    () -> assertThat(savedWish.getId()).isNotNull(),
+                    () -> assertThat(savedWish.getMember().getId()).isEqualTo(
+                            existingMember.getId()),
+                    () -> assertThat(savedWish.getProduct().getId()).isEqualTo(
+                            existingProduct.getId())
             );
         }
 
@@ -78,13 +80,16 @@ class WishRepositoryTest {
         void 널_값이_포함된_위시_아이템_삽입_시_예외_발생() {
 
             Wish allNullWish = new Wish(null, null);
-            Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(allNullWish));
+            Assertions.assertThrows(DataIntegrityViolationException.class,
+                    () -> wishRepository.save(allNullWish));
 
             Wish memberNullWish = new Wish(null, existingProduct);
-            Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(memberNullWish));
+            Assertions.assertThrows(DataIntegrityViolationException.class,
+                    () -> wishRepository.save(memberNullWish));
 
             Wish productNullWish = new Wish(existingMember, null);
-            Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(productNullWish));
+            Assertions.assertThrows(DataIntegrityViolationException.class,
+                    () -> wishRepository.save(productNullWish));
         }
 
         @Test
@@ -97,7 +102,8 @@ class WishRepositoryTest {
                     nonExistentMember,
                     nonExistentProduct
             );
-            Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(wish));
+            Assertions.assertThrows(DataIntegrityViolationException.class,
+                    () -> wishRepository.save(wish));
         }
     }
 
@@ -116,10 +122,12 @@ class WishRepositoryTest {
 
             Page<Wish> wishes = wishRepository.findAllByMemberId(existingMember.getId(), null);
             assertAll(
-                () -> assertThat(wishes.getContent()).hasSize(1),
-                () -> assertThat(wishes.getContent().get(0).getId()).isNotNull(),
-                () -> assertThat(wishes.getContent().get(0).getMember().getId()).isEqualTo(existingMember.getId()),
-                () -> assertThat(wishes.getContent().get(0).getProduct().getId()).isEqualTo(existingProduct.getId())
+                    () -> assertThat(wishes.getContent()).hasSize(1),
+                    () -> assertThat(wishes.getContent().get(0).getId()).isNotNull(),
+                    () -> assertThat(wishes.getContent().get(0).getMember().getId()).isEqualTo(
+                            existingMember.getId()),
+                    () -> assertThat(wishes.getContent().get(0).getProduct().getId()).isEqualTo(
+                            existingProduct.getId())
             );
         }
 

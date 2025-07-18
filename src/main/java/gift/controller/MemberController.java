@@ -24,14 +24,14 @@ public class MemberController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterMemberResponse> createMember (
+    public ResponseEntity<RegisterMemberResponse> createMember(
             @Valid @RequestBody RegisterMemberRequest registerMemberRequest
     ) {
         memberService.createMember(registerMemberRequest.email(), registerMemberRequest.password());
 
         String token = memberService.login(
-            registerMemberRequest.email(),
-            registerMemberRequest.password()
+                registerMemberRequest.email(),
+                registerMemberRequest.password()
         );
 
         return ResponseEntity
@@ -40,12 +40,12 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginMemberResponse> login (
+    public ResponseEntity<LoginMemberResponse> login(
             @Valid @RequestBody LoginMemberRequest loginMemberRequest
     ) {
         String token = memberService.login(
-            loginMemberRequest.email(),
-            loginMemberRequest.password()
+                loginMemberRequest.email(),
+                loginMemberRequest.password()
         );
 
         return ResponseEntity
