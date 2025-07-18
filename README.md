@@ -128,7 +128,7 @@
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213655818))
 - [x] Utility 클래스 리펙터링
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213672336))
-- [ ] 연관관계 어노테이션 속성 부여를 통한
+- [x] 연관관계 어노테이션 속성 부여를 통한
   성능개선 ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213616355))
 
 #### [feat]
