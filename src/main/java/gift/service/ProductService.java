@@ -20,10 +20,22 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
+    // Create
     @Transactional
     public ProductDto createProduct(NewProductCommand command) {
         Product product = new Product(command.name(), command.price(), command.imageUrl());
         return ProductDto.from(productRepository.save(product));
+    }
+
+    // Read
+    protected Product findProductByIdAndNotDeleted(Long id) {
+        return productRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
+    }
+
+    protected Product findProductByIdIncludingDeleted(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
     }
 
     // for normal users
@@ -48,6 +60,8 @@ public class ProductService {
         return pageProduct.map(ProductDto::from);
     }
 
+    // Update
+
     @Transactional
     public ProductDto updateProductById(UpdateProductCommand command) {
         Product product = findProductByIdAndNotDeleted(command.id());
@@ -61,19 +75,11 @@ public class ProductService {
         product.setValidated(validated);
     }
 
+    // Delete
+
     @Transactional
     public void softDeleteProductById(Long id) {
         Product product = findProductByIdAndNotDeleted(id);
         product.setDeleted(true);
-    }
-
-    protected Product findProductByIdAndNotDeleted(Long id) {
-        return productRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
-    }
-
-    protected Product findProductByIdIncludingDeleted(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
     }
 }

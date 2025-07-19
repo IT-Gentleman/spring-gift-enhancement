@@ -3,7 +3,7 @@ package gift.controller;
 import gift.dto.LoginMemberCommand;
 import gift.dto.LoginMemberRequest;
 import gift.exception.InvalidCredentialsException;
-import gift.service.MemberService;
+import gift.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -22,10 +22,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/admin")
 public class LoginAdminPageController {
 
-    private final MemberService memberService;
+    private final AuthService authService;
 
-    public LoginAdminPageController(MemberService memberService) {
-        this.memberService = memberService;
+    public LoginAdminPageController(AuthService authService) {
+        this.authService = authService;
     }
 
     @GetMapping("/login")
@@ -54,7 +54,7 @@ public class LoginAdminPageController {
         try {
             LoginMemberCommand command = new LoginMemberCommand(request.email(),
                     request.password());
-            String token = memberService.login(command);
+            String token = authService.login(command);
             Cookie cookie = new Cookie("token", token);
             cookie.setHttpOnly(true);
             cookie.setPath("/");

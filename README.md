@@ -124,12 +124,16 @@
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213629548))
     - `existsByIdAndMemberId()` 후 `deleteByIdAndMemberId()` 호출하는 경우가 이에 해당
     - 단순히 id를 통해 불러오고 검증한 뒤, id를 기반으로 삭제요청하는 것으로 변경
-- [ ] MemberService 클래스의 멤버정보 추가/갱신 메소드 리펙터링
+- [x] MemberService 클래스의 멤버정보 추가/갱신 메소드 리펙터링
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213655818))
 - [x] Utility 클래스 리펙터링
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213672336))
 - [x] 연관관계 어노테이션 속성 부여를 통한
   성능개선 ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213616355))
+- [x] MemberService 클래스 리펙터링
+    - 인증(로그인) 로직의 AuthService 클래스로의 분리
+        - 각 서비스 별 책임 분리를 통한 코드 가독성 증대
+    - 이메일 중복여부 체크로직 간단화
 
 #### [feat]
 

@@ -27,12 +27,7 @@ public class WishService {
         this.memberService = memberService;
     }
 
-    @Transactional(readOnly = true)
-    public Page<WishDto> getWishListByMemberId(Long memberId, Pageable pageable) {
-        Page<Wish> wishPage = wishRepository.findAllByMemberId(memberId, pageable);
-        return wishPage.map(wish -> WishDto.from(wish));
-    }
-
+    // Create
     @Transactional
     public WishDto addWishItem(NewWishCommand wishCommand) {
         Member member = memberService.findMemberById(wishCommand.memberId());
@@ -46,6 +41,16 @@ public class WishService {
         return WishDto.from(wishRepository.save(wish));
     }
 
+    // Read
+    @Transactional(readOnly = true)
+    public Page<WishDto> getWishListByMemberId(Long memberId, Pageable pageable) {
+        Page<Wish> wishPage = wishRepository.findAllByMemberId(memberId, pageable);
+        return wishPage.map(wish -> WishDto.from(wish));
+    }
+
+    // Update
+
+    // Delete
     @Transactional
     public void removeWishItemByWishId(Long memberId, Long wishId) {
         // 삭제하고자 하는 wish 조회

@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import gift.service.MemberService;
+import gift.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ class LoginAdminPageControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private MemberService memberService;
+    private AuthService authService;
 
     @Test
     void 로그인_페이지_요청_시_로그인페이지() throws Exception {
@@ -40,7 +40,7 @@ class LoginAdminPageControllerTest {
         String email = "hello@world.com";
         String password = "password123456789";
         String expectedToken = "dummy-jwt-token";
-        when(memberService.login(any())).thenReturn(expectedToken);
+        when(authService.login(any())).thenReturn(expectedToken);
 
         mockMvc.perform(post("/admin/login")
                         .param("email", email)

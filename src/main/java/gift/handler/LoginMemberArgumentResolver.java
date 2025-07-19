@@ -1,6 +1,6 @@
 package gift.handler;
 
-import gift.service.MemberService;
+import gift.service.AuthService;
 import gift.validator.LoginMember;
 import java.util.Optional;
 import org.springframework.core.MethodParameter;
@@ -14,10 +14,10 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final MemberService memberService;
+    private final AuthService authService;
 
-    public LoginMemberArgumentResolver(MemberService memberService) {
-        this.memberService = memberService;
+    public LoginMemberArgumentResolver(AuthService authService) {
+        this.authService = authService;
     }
 
     @Override
@@ -40,6 +40,6 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             throw new IllegalArgumentException("Invalid or missing authorization header");
         }
         String token = authority.split("Bearer ")[1].trim();
-        return memberService.getAuthenticationFromToken(token);
+        return authService.getAuthenticationFromToken(token);
     }
 }

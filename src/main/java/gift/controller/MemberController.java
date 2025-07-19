@@ -6,6 +6,7 @@ import gift.dto.LoginMemberResponse;
 import gift.dto.NewMemberCommand;
 import gift.dto.RegisterMemberRequest;
 import gift.dto.RegisterMemberResponse;
+import gift.service.AuthService;
 import gift.service.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberService memberService;
+    private final AuthService authService;
 
-    public MemberController(MemberService memberService) {
+    public MemberController(MemberService memberService, AuthService authService) {
         this.memberService = memberService;
+        this.authService = authService;
     }
 
     @PostMapping("/register")
@@ -39,7 +42,7 @@ public class MemberController {
                 registerMemberRequest.email(),
                 registerMemberRequest.password()
         );
-        String token = memberService.login(loginMemberCommand);
+        String token = authService.login(loginMemberCommand);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -54,7 +57,7 @@ public class MemberController {
                 loginMemberRequest.email(),
                 loginMemberRequest.password()
         );
-        String token = memberService.login(loginMemberCommand);
+        String token = authService.login(loginMemberCommand);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
