@@ -36,7 +36,8 @@ public class MemberService {
     }
 
     // Read
-    protected Member findMemberById(Long id) {
+    // 동일 패키지 내 사용 제한
+    Member findMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Member not found: id=" + id));
     }

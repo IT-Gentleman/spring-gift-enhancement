@@ -28,18 +28,35 @@ class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
-    @Test
+    @Nested
     @DisplayName("Product createProduct() - 상품 생성 테스트")
-    void 상품생성_시_반환() {
-        String name = "Test Product";
-        Integer price = 10000;
-        String imageUrl = "http://example.com/image.jpg";
-        Product expectedProduct = new Product(1L, name, price, imageUrl, false, false);
-        when(productRepository.save(any())).thenReturn(expectedProduct);
+    class CreateProductTests {
 
-        assertThat(productService.createProduct(
-                new NewProductCommand(name, price, imageUrl))).isEqualTo(
-                ProductDto.from(expectedProduct));
+        @Test
+        @DisplayName("옵션과 함께 상품 생성 시 성공")
+        void createProductWithOptions_Success() {
+            String name = "Test Product";
+            Integer price = 10000;
+            String imageUrl = "http://example.com/image.jpg";
+            var options = java.util.List.of(new gift.dto.NewProductOptionCommand("Option 1", 10, null));
+            Product expectedProduct = new Product(1L, name, price, imageUrl, false, false);
+            when(productRepository.save(any(Product.class))).thenReturn(expectedProduct);
+
+            NewProductCommand command = new NewProductCommand(name, price, imageUrl, options);
+            ProductDto result = productService.createProduct(command);
+
+            assertThat(result).isEqualTo(ProductDto.from(expectedProduct));
+        }
+
+        @Test
+        @DisplayName("옵션 없이 상품 생성 시 BadRequestException 발생")
+        void createProductWithoutOptions_ThrowsBadRequestException() {
+            NewProductCommand command = new NewProductCommand("Test", 100, "url", java.util.Collections.emptyList());
+
+            assertThrows(gift.exception.BadRequestException.class, () -> {
+                productService.createProduct(command);
+            });
+        }
     }
 
     @Nested

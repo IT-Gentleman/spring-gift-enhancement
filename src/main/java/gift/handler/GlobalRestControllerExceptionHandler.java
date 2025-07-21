@@ -1,6 +1,7 @@
 package gift.handler;
 
 import gift.dto.ErrorResponse;
+import gift.exception.BadRequestException;
 import gift.exception.ConflictException;
 import gift.exception.InvalidCredentialsException;
 import gift.exception.NotFoundException;
@@ -43,6 +44,12 @@ public class GlobalRestControllerExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorResponse> handleConflictException(ConflictException ex) {
         HttpStatus status = HttpStatus.CONFLICT;
+        return ResponseEntity.status(status).body(new ErrorResponse(status, ex.getMessage()));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         return ResponseEntity.status(status).body(new ErrorResponse(status, ex.getMessage()));
     }
 }

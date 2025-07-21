@@ -2,6 +2,7 @@ package gift.controller;
 
 import gift.dto.CreateProductRequest;
 import gift.dto.NewProductCommand;
+import gift.dto.NewProductOptionCommand;
 import gift.dto.PageRequest;
 import gift.dto.PageResponse;
 import gift.dto.ProductDto;
@@ -86,7 +87,10 @@ public class ProductAdminPageController {
         NewProductCommand command = new NewProductCommand(
                 request.name(),
                 request.price(),
-                request.imageUrl()
+                request.imageUrl(),
+                request.options().stream()
+                        .map(o -> new NewProductOptionCommand(o.name(), o.quantity(), null))
+                        .toList()
         );
         ProductDto created = productService.createProduct(command);
         redirectAttributes.addFlashAttribute("message",

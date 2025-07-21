@@ -1,8 +1,8 @@
 package gift.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gift.entity.Member;
@@ -64,10 +64,8 @@ class MemberRepositoryTest {
                     "anotherEncryptedPassword",
                     Role.ROLE_SELLER
             );
-            assertThrows(
-                    DataIntegrityViolationException.class,
-                    () -> memberRepository.save(duplicateEmailMember)
-            );
+            assertThatExceptionOfType(DataIntegrityViolationException.class)
+                    .isThrownBy(() -> memberRepository.save(duplicateEmailMember));
         }
 
         @Test
@@ -76,24 +74,24 @@ class MemberRepositoryTest {
             // identifyNumber는 항상 null인 상태로 삽입되어야 함
 
             Member allNullMember = new Member(null, null, null, null);
-            assertThrows(DataIntegrityViolationException.class,
-                    () -> memberRepository.save(allNullMember));
+            assertThatExceptionOfType(DataIntegrityViolationException.class)
+                    .isThrownBy(() -> memberRepository.save(allNullMember));
 
             Member emailNullMember = new Member(null, null, "encryptedPasswordByBCryptEncryptor",
                     Role.ROLE_USER);
-            assertThrows(DataIntegrityViolationException.class,
-                    () -> memberRepository.save(emailNullMember));
+            assertThatExceptionOfType(DataIntegrityViolationException.class)
+                    .isThrownBy(() -> memberRepository.save(emailNullMember));
             new Member(null, "example@email.com", "encryptedPasswordByBCryptEncryptor",
                     Role.ROLE_USER);
 
             Member passwordNullMember = new Member(null, "example@email.com", null, Role.ROLE_USER);
-            assertThrows(DataIntegrityViolationException.class,
-                    () -> memberRepository.save(passwordNullMember));
+            assertThatExceptionOfType(DataIntegrityViolationException.class)
+                    .isThrownBy(() -> memberRepository.save(passwordNullMember));
 
             Member authorityNullMember = new Member(null, "example@email.com",
                     "encryptedPasswordByBCryptEncryptor", null);
-            assertThrows(DataIntegrityViolationException.class,
-                    () -> memberRepository.save(authorityNullMember));
+            assertThatExceptionOfType(DataIntegrityViolationException.class)
+                    .isThrownBy(() -> memberRepository.save(authorityNullMember));
         }
     }
 

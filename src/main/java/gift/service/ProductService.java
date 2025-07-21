@@ -4,6 +4,8 @@ import gift.dto.NewProductCommand;
 import gift.dto.ProductDto;
 import gift.dto.UpdateProductCommand;
 import gift.entity.Product;
+import gift.entity.ProductOption;
+import gift.exception.BadRequestException;
 import gift.exception.NotFoundException;
 import gift.repository.ProductRepository;
 import org.springframework.data.domain.Page;
@@ -23,17 +25,26 @@ public class ProductService {
     // Create
     @Transactional
     public ProductDto createProduct(NewProductCommand command) {
-        Product product = new Product(command.name(), command.price(), command.imageUrl());
+        if (command.options().isEmpty()) {
+            throw new BadRequestException("Product must have at least one option.");
+        }
+        Product product = new Product(command.name(), command.price(), command.imageUrl(),
+                command.options().stream().map(
+                                option -> new ProductOption(option.name(), option.quantity(), null))
+                        .toList()
+        );
         return ProductDto.from(productRepository.save(product));
     }
 
     // Read
-    protected Product findProductByIdAndNotDeleted(Long id) {
+    // 동일 패키지 내 사용 제한
+    Product findProductByIdAndNotDeleted(Long id) {
         return productRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
     }
 
-    protected Product findProductByIdIncludingDeleted(Long id) {
+    // 동일 패키지 내 사용 제한
+    Product findProductByIdIncludingDeleted(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
     }

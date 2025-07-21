@@ -74,10 +74,12 @@ public class ProductE2ETest {
         @Test
         @DisplayName("POST /api/products - 유효한 생성 시 201 CREATED")
         void 유효한_생성_시_201_CREATED() {
+            var options = java.util.List.of(new gift.dto.AddProductOptionRequest("Option 1", 10));
             CreateProductRequest requestDto = new CreateProductRequest(
                     "아이스 카페 아메리카노 T",
                     4700,
-                    "https://st.kakaocdn.net/product/gift/product/20231010111814_9a667f9eccc943648797925498bdd8a3.jpg"
+                    "https://st.kakaocdn.net/product/gift/product/20231010111814_9a667f9eccc943648797925498bdd8a3.jpg",
+                    options
             );
             ResponseEntity<ProductResponse> response = restClient.post()
                     .uri(url)
@@ -92,9 +94,30 @@ public class ProductE2ETest {
         }
 
         @Test
+        @DisplayName("POST /api/products - 옵션 없이 생성 시 400 BAD_REQUEST")
+        void 옵션_없이_생성_시_400_BAD_REQUEST() {
+            CreateProductRequest requestDto = new CreateProductRequest(
+                    "Test Product",
+                    1000,
+                    "test.jpg",
+                    java.util.Collections.emptyList()
+            );
+            assertThatExceptionOfType(HttpClientErrorException.BadRequest.class)
+                    .isThrownBy(
+                            () ->
+                                    restClient.post()
+                                            .uri(url)
+                                            .header("Authorization", "Bearer " + mdToken)
+                                            .body(requestDto)
+                                            .retrieve()
+                                            .toEntity(Void.class)
+                    );
+        }
+
+        @Test
         @DisplayName("POST /api/products - 유효하지 않은 생성 시 400 BAD_REQUEST")
         void 유효하지_않은_생성_시_400_BAD_REQUEST() {
-            CreateProductRequest requestDto = new CreateProductRequest(null, null, null);
+            CreateProductRequest requestDto = new CreateProductRequest(null, null, null, java.util.Collections.emptyList());
             assertThatExceptionOfType(HttpClientErrorException.BadRequest.class)
                     .isThrownBy(
                             () ->

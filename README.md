@@ -143,6 +143,25 @@
 - [x] 예외발생 메시지의 예외발생 항목 명시
   ([관련 PR Comment](https://github.com/next-step/spring-gift-enhancement/pull/181#discussion_r2213632458))
 
+### Step3 implementation
+
+- [x] 상품 옵션 기능 구현
+    - 상품 옵션 엔티티, Repository, Service, Controller 레이어 구축
+    - 다음의 제약사항 구현
+        - 이름
+            - `RequestDto` 특수문자, 길이 제한
+            - `Service` 중복 옵션명 제한
+        - 수량
+            - `Entity` 최대최소값을 0 이상 1억 미만으로 제한
+            - `RequestDto` 단, 등록 시에 한해 최소값 1으로 제한
+        - 이 외 NotNull, FK 제약조건 설정
+- [x] 상품 옵션 - 상품 연관관계 매핑
+    - 상품 엔티티와 상품 옵션 엔티티 간의 연관관계 매핑
+- [x] 상품 옵션 관리 Api 구현
+- [x] 상품 등록 간 상품 옵션 등록 기능 구현
+    - 최소 1개 이상의 옵션이 있어야 상품 등록 가능 제약사항 추가
+    - 상품 등록 시, 옵션 등록 기능 구현
+
 ## TODO
 
 ### Whenever is ready
@@ -151,11 +170,25 @@
 
 - [ ] application.properties 파일을 .yaml 파일로의 변경 및 리펙터링
     - `jwt.expire-length` 속성의 단위를 주석으로 명시
+- [ ] 인증(로그인/회원가입) 로직을 처리하는 controller 클래스의 리펙터링
+    - 클래스명을 `AuthController`로 변경
+        - 현재 Controller 클래스가 궁극적으로 수행하는 것(사용자의 최종 목표)은 인증이라는 관점
+    - 추후 회원 본인 정보 조회/수정기능 구현 시, `MemberController` 작성
 
 #### [feat]
 
+- [ ] 상품 옵션 관리 Admin Page 구현
 - [ ] JPA Auditing 적용
     - soft delete 시 `deletedAt` 필드에 삭제시간 기록, deleted 필드 대체
+- [ ] 상품 옵션 Ordering 기능 구현
+    - 상품 옵션의 순서를 변경할 수 있는 기능 구현
+    - 상품 옵션의 최상단은 옵션가 0원이 위치해야하며, 기본선택되어야함
+- [ ] `Role.ROLE_SELLER`에 한해 본인 등록 상품 수정 기능 추가
+    - JPA Auditing 기반 수행
+- [ ] 상품 옵션 재고 동시수정 시 동시성문제 해결
+    - 해결방안은 재고 필요
+        - Gemini는 `@Version` 어노테이션을 가진 필드 추가 통한 낙관적 Locking을 추천
+        - 이 경우, Service 레이어에서 최대 N회 재시도하는 로직을 구현해야함
 
 ### Wondering to apply
 

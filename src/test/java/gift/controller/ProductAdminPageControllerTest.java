@@ -66,6 +66,8 @@ class ProductAdminPageControllerTest {
                                 .param("name", mockProduct.getName())
                                 .param("price", String.valueOf(mockProduct.getPrice()))
                                 .param("imageUrl", mockProduct.getImageUrl())
+                                .param("options[0].name", "Option 1")
+                                .param("options[0].quantity", "10")
                 )
                 .andExpect(redirectedUrl("/admin/products/" + mockProduct.getId()));
     }
@@ -85,6 +87,8 @@ class ProductAdminPageControllerTest {
                                 .param("name", mockProduct.getName())
                                 .param("price", String.valueOf(mockProduct.getPrice()))
                                 .param("imageUrl", mockProduct.getImageUrl())
+                                .param("options[0].name", "Option 1")
+                                .param("options[0].quantity", "10")
                 )
                 .andExpect(view().name("admin/product-form"))
                 .andExpect(model().attributeHasErrors("createProductRequest"));

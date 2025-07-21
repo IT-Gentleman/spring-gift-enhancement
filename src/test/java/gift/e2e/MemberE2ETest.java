@@ -2,6 +2,7 @@ package gift.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import gift.dto.LoginMemberRequest;
 import gift.dto.LoginMemberResponse;
@@ -62,8 +63,10 @@ class MemberE2ETest {
                     .retrieve()
                     .toEntity(RegisterMemberResponse.class);
 
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-            assertThat(response.getBody()).hasFieldOrProperty("token");
+            assertAll(
+                    () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED),
+                    () -> assertThat(response.getBody()).hasFieldOrProperty("token")
+            );
         }
 
         @Test
@@ -151,8 +154,10 @@ class MemberE2ETest {
                     .retrieve()
                     .toEntity(LoginMemberResponse.class);
 
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(response.getBody()).hasFieldOrProperty("token");
+            assertAll(
+                    () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
+                    () -> assertThat(response.getBody()).hasFieldOrProperty("token")
+            );
         }
 
         @Test

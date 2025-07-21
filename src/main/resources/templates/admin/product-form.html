@@ -41,9 +41,41 @@
             <label for="imageUrl">Image URL:</label>
             <input type="text" id="imageUrl" th:field="*{imageUrl}" class="form-control" />
         </div>
+        <div th:if="${productId == null}">
+            <div id="options-container">
+                <div class="form-group option">
+                    <label>Option 1:</label>
+                    <input type="text" name="options[0].name" class="form-control" placeholder="Option Name" required>
+                    <input type="number" name="options[0].quantity" class="form-control mt-2" placeholder="Quantity" required>
+                    <button type="button" class="btn btn-danger btn-sm mt-2 remove-option">Remove</button>
+                </div>
+            </div>
+            <button type="button" id="add-option" class="btn btn-secondary mb-3">Add Option</button>
+        </div>
         <button type="submit" class="btn btn-primary" th:if="${productId == null}">Create</button>
         <button type="submit" class="btn btn-primary" th:if="${productId != null and !deleted}">Apply Changes</button>
     </form>
+
+    <script>
+        document.getElementById('add-option').addEventListener('click', function() {
+            var optionsContainer = document.getElementById('options-container');
+            var optionIndex = optionsContainer.children.length;
+            var newOption = document.createElement('div');
+            newOption.classList.add('form-group', 'option');
+            newOption.innerHTML =
+                '<label>Option ' + (optionIndex + 1) + ':</label>' +
+                '<input type="text" name="options[' + optionIndex + '].name" class="form-control" placeholder="Option Name" required>' +
+                '<input type="number" name="options[' + optionIndex + '].quantity" class="form-control mt-2" placeholder="Quantity" required>' +
+                '<button type="button" class="btn btn-danger btn-sm mt-2 remove-option">Remove</button>';
+            optionsContainer.appendChild(newOption);
+        });
+
+        document.getElementById('options-container').addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('remove-option')) {
+                e.target.closest('.option').remove();
+            }
+        });
+    </script>
 
     <div class="mt-3">
         <form th:if="${productId != null}" th:action="@{/admin/products/{id}(id=${productId})}" method="post" style="display:inline" onsubmit="return confirm('Are you sure to delete?');">

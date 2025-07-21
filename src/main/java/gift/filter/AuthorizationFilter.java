@@ -33,6 +33,10 @@ public class AuthorizationFilter implements Filter {
     }
 
     private boolean isAuthorized(String uri, String method, String role) {
+        // /api/products/{id}/options : method에 따라 제한 role 존재
+        if (uri.startsWith("/api/products/") && uri.contains("options")) {
+            return checkApiProductsOptionsAuthorization(method, role);
+        }
         // /api/products : method에 따라 제한 role 존재
         if (uri.startsWith("/api/products")) {
             return checkApiProductsAuthorization(method, role);
@@ -58,6 +62,15 @@ public class AuthorizationFilter implements Filter {
             return checkAdminMembersAuthorization(method, role);
         }
         return true; // Authorize by default for public endpoints (ex. /api/members : for register & login)
+    }
+
+    private boolean checkApiProductsOptionsAuthorization(String method, String role) {
+        switch (method) {
+            case "POST", "PATCH", "DELETE":
+                return hasAnyRole(role, Role.ROLE_MD);
+            default:
+                return true;
+        }
     }
 
     private boolean checkApiProductsAuthorization(String method, String role) {

@@ -2,6 +2,7 @@ package gift.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import gift.dto.AddWishRequest;
 import gift.dto.PageResponse;
@@ -90,10 +91,13 @@ public class WishE2ETest {
                     .toEntity(new ParameterizedTypeReference<>() {
                     });
 
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(response.getBody()).isNotNull();
-            assertThat(response.getBody().content().size()).isEqualTo(1);
-            assertThat(response.getBody().content().get(0).productName()).isEqualTo("Product 1");
+            assertAll(
+                    () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
+                    () -> assertThat(response.getBody()).isNotNull(),
+                    () -> assertThat(response.getBody().content().size()).isEqualTo(1),
+                    () -> assertThat(response.getBody().content().get(0).productName()).isEqualTo(
+                            "Product 1")
+            );
         }
 
         @Test
@@ -126,9 +130,12 @@ public class WishE2ETest {
                     .retrieve()
                     .toEntity(WishResponse.class);
 
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-            assertThat(response.getBody()).isNotNull();
-            assertThat(response.getBody().productId()).isEqualTo(savedProduct1.getId());
+            assertAll(
+                    () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED),
+                    () -> assertThat(response.getBody()).isNotNull(),
+                    () -> assertThat(response.getBody().productId()).isEqualTo(
+                            savedProduct1.getId())
+            );
         }
 
         @Test
@@ -190,7 +197,10 @@ public class WishE2ETest {
                     .retrieve()
                     .toEntity(Void.class);
 
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+            assertAll(
+                    () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT),
+                    () -> assertThat(wishRepository.existsById(wish.getId())).isFalse()
+            );
         }
 
         @Test

@@ -2,6 +2,7 @@ package gift.controller;
 
 import gift.dto.CreateProductRequest;
 import gift.dto.NewProductCommand;
+import gift.dto.NewProductOptionCommand;
 import gift.dto.PageRequest;
 import gift.dto.PageResponse;
 import gift.dto.PatchProductRequest;
@@ -42,7 +43,8 @@ public class ProductController {
         NewProductCommand command = new NewProductCommand(
                 request.name(),
                 request.price(),
-                request.imageUrl()
+                request.imageUrl(),
+                request.options().stream().map(NewProductOptionCommand::from).toList()
         );
         ProductDto dto = productService.createProduct(command);
         return ResponseEntity

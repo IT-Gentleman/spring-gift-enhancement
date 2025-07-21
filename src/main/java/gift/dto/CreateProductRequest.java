@@ -1,10 +1,13 @@
 package gift.dto;
 
 import gift.entity.Product;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public record CreateProductRequest(
         @NotNull(message = "상품명은 필수적으로 작성되어야 합니다.")
@@ -21,18 +24,25 @@ public record CreateProductRequest(
 
         @NotNull(message = "상품 이미지 URL은 필수적으로 작성되어야 합니다.")
         @Size(min = 0, max = 255, message = "상품 이미지 URL은 255자 이내여야 합니다.")
-        String imageUrl
+        String imageUrl,
+
+        @NotEmpty
+        @Valid
+        List<AddProductOptionRequest> options
 ) {
 
     public static CreateProductRequest empty() {
-        return new CreateProductRequest("", 1, "");
+        return new CreateProductRequest("", 1, "", List.of());
     }
 
     public static CreateProductRequest from(Product product) {
         return new CreateProductRequest(
                 product.getName(),
                 product.getPrice(),
-                product.getImageUrl()
+                product.getImageUrl(),
+                product.getOptionList().stream()
+                        .map(AddProductOptionRequest::from)
+                        .toList()
         );
     }
 }
