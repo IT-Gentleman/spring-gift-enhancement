@@ -1,6 +1,6 @@
 package gift.dto;
 
-public record LoginMemberCommand(
+public record LoginCommand(
         String email,
         String password
 ) {

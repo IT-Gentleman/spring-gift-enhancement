@@ -1,8 +1,8 @@
 package gift.controller;
 
-import gift.dto.LoginMemberCommand;
-import gift.dto.LoginMemberRequest;
-import gift.dto.LoginMemberResponse;
+import gift.dto.LoginCommand;
+import gift.dto.LoginRequest;
+import gift.dto.LoginResponse;
 import gift.dto.NewMemberCommand;
 import gift.dto.RegisterMemberRequest;
 import gift.dto.RegisterMemberResponse;
@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/members")
-public class MemberController {
+@RequestMapping("/api/auth")
+public class AuthController {
 
     private final MemberService memberService;
     private final AuthService authService;
 
-    public MemberController(MemberService memberService, AuthService authService) {
+    public AuthController(MemberService memberService, AuthService authService) {
         this.memberService = memberService;
         this.authService = authService;
     }
@@ -38,11 +38,11 @@ public class MemberController {
         );
         memberService.createMember(newMemberCommand);
 
-        LoginMemberCommand loginMemberCommand = new LoginMemberCommand(
+        LoginCommand loginCommand = new LoginCommand(
                 registerMemberRequest.email(),
                 registerMemberRequest.password()
         );
-        String token = authService.login(loginMemberCommand);
+        String token = authService.login(loginCommand);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -50,17 +50,17 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginMemberResponse> login(
-            @Valid @RequestBody LoginMemberRequest loginMemberRequest
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest loginRequest
     ) {
-        LoginMemberCommand loginMemberCommand = new LoginMemberCommand(
-                loginMemberRequest.email(),
-                loginMemberRequest.password()
+        LoginCommand loginCommand = new LoginCommand(
+                loginRequest.email(),
+                loginRequest.password()
         );
-        String token = authService.login(loginMemberCommand);
+        String token = authService.login(loginCommand);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(new LoginMemberResponse(token));
+                .body(new LoginResponse(token));
     }
 }

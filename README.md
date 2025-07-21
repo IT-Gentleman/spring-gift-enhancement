@@ -168,17 +168,16 @@
 
 - [x] application.properties 파일을 .yaml 파일로의 변경 및 리펙터링
     - `jwt.expire-length` 속성의 단위 명시
+- [x] 인증(로그인/회원가입) 로직을 처리하는 controller 클래스의 리펙터링
+    - 클래스명을 `AuthController`로 변경
+        - 현재 Controller 클래스가 궁극적으로 수행하는 것(사용자의 최종 목표)은 인증이라는 관점
+    - 추후 회원 본인 정보 조회/수정기능 구현 시, `MemberController` 작성
 
 ## TODO
 
 ### Whenever is ready
 
 #### [refactor]
-
-- [ ] 인증(로그인/회원가입) 로직을 처리하는 controller 클래스의 리펙터링
-    - 클래스명을 `AuthController`로 변경
-        - 현재 Controller 클래스가 궁극적으로 수행하는 것(사용자의 최종 목표)은 인증이라는 관점
-    - 추후 회원 본인 정보 조회/수정기능 구현 시, `MemberController` 작성
 
 #### [feat]
 

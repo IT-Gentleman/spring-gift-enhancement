@@ -18,9 +18,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(value = LoginAdminPageController.class, excludeAutoConfiguration = {
+@WebMvcTest(value = AuthAdminPageController.class, excludeAutoConfiguration = {
         SecurityAutoConfiguration.class})
-class LoginAdminPageControllerTest {
+class AuthAdminPageControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

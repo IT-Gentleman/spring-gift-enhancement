@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import gift.dto.LoginMemberRequest;
-import gift.dto.LoginMemberResponse;
+import gift.dto.LoginRequest;
+import gift.dto.LoginResponse;
 import gift.dto.RegisterMemberRequest;
 import gift.dto.RegisterMemberResponse;
 import gift.repository.MemberRepository;
@@ -23,7 +23,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class MemberE2ETest {
+class AuthE2ETest {
 
     private final String baseUrl = "http://localhost:";
 
@@ -147,12 +147,12 @@ class MemberE2ETest {
         @Test
         @DisplayName("POST /api/members/login - 유효한 정보로 로그인 시 200 OK")
         void 유효한_정보로_로그인_시_200_OK() {
-            LoginMemberRequest loginRequest = new LoginMemberRequest(userEmail, userPassword);
-            ResponseEntity<LoginMemberResponse> response = restClient.post()
+            LoginRequest loginRequest = new LoginRequest(userEmail, userPassword);
+            ResponseEntity<LoginResponse> response = restClient.post()
                     .uri(loginUrl)
                     .body(loginRequest)
                     .retrieve()
-                    .toEntity(LoginMemberResponse.class);
+                    .toEntity(LoginResponse.class);
 
             assertAll(
                     () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
@@ -163,7 +163,7 @@ class MemberE2ETest {
         @Test
         @DisplayName("POST /api/members/login - 잘못된 비밀번호로 로그인 시 403 FORBIDDEN")
         void 잘못된_비밀번호로_로그인_시_403_FORBIDDEN() {
-            LoginMemberRequest loginRequest = new LoginMemberRequest(userEmail, "wrongpassword");
+            LoginRequest loginRequest = new LoginRequest(userEmail, "wrongpassword");
 
             assertThatExceptionOfType(HttpClientErrorException.class)
                     .isThrownBy(() -> restClient.post()
@@ -178,7 +178,7 @@ class MemberE2ETest {
         @Test
         @DisplayName("POST /api/members/login - 존재하지 않는 이메일로 로그인 시 403 FORBIDDEN")
         void 존재하지_않는_이메일로_로그인_시_403_FORBIDDEN() {
-            LoginMemberRequest loginRequest = new LoginMemberRequest("noexisting@example.com",
+            LoginRequest loginRequest = new LoginRequest("noexisting@example.com",
                     userPassword);
 
             assertThatExceptionOfType(HttpClientErrorException.class)

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-import gift.dto.LoginMemberCommand;
+import gift.dto.LoginCommand;
 import gift.entity.Member;
 import gift.entity.Role;
 import gift.exception.InvalidCredentialsException;
@@ -58,7 +58,7 @@ public class AuthServiceTest {
                         .thenReturn(true);
                 when(jwtTokenProvider.createToken(existingMember)).thenReturn("validToken");
 
-                String token = authService.login(new LoginMemberCommand(email, rawPassword));
+                String token = authService.login(new LoginCommand(email, rawPassword));
 
                 assertThat(token).isEqualTo("validToken");
             }
@@ -74,7 +74,7 @@ public class AuthServiceTest {
             when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
             assertThrows(InvalidCredentialsException.class,
-                    () -> authService.login(new LoginMemberCommand(email, rawPassword)));
+                    () -> authService.login(new LoginCommand(email, rawPassword)));
         }
 
         @Test
@@ -94,7 +94,7 @@ public class AuthServiceTest {
                         .thenReturn(false);
 
                 assertThrows(InvalidCredentialsException.class,
-                        () -> authService.login(new LoginMemberCommand(email, rawPassword)));
+                        () -> authService.login(new LoginCommand(email, rawPassword)));
             }
         }
     }

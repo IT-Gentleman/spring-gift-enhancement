@@ -1,7 +1,7 @@
 package gift.controller;
 
-import gift.dto.LoginMemberCommand;
-import gift.dto.LoginMemberRequest;
+import gift.dto.LoginCommand;
+import gift.dto.LoginRequest;
 import gift.exception.InvalidCredentialsException;
 import gift.service.AuthService;
 import jakarta.servlet.http.Cookie;
@@ -20,23 +20,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
-public class LoginAdminPageController {
+public class AuthAdminPageController {
 
     private final AuthService authService;
 
-    public LoginAdminPageController(AuthService authService) {
+    public AuthAdminPageController(AuthService authService) {
         this.authService = authService;
     }
 
     @GetMapping("/login")
     public String loginAdminPage(Model model) {
-        model.addAttribute("member", LoginMemberRequest.empty());
+        model.addAttribute("member", LoginRequest.empty());
         return "admin/login-form";
     }
 
     @PostMapping("/login")
     public String loginAdminPage(
-            @Valid @ModelAttribute LoginMemberRequest request,
+            @Valid @ModelAttribute LoginRequest request,
             BindingResult bindingResult,
             Model model,
             RedirectAttributes redirectAttributes,
@@ -52,7 +52,7 @@ public class LoginAdminPageController {
         }
 
         try {
-            LoginMemberCommand command = new LoginMemberCommand(request.email(),
+            LoginCommand command = new LoginCommand(request.email(),
                     request.password());
             String token = authService.login(command);
             Cookie cookie = new Cookie("token", token);

@@ -1,7 +1,7 @@
 package gift.service;
 
 import gift.dto.AuthenticatedMember;
-import gift.dto.LoginMemberCommand;
+import gift.dto.LoginCommand;
 import gift.entity.Member;
 import gift.exception.InvalidCredentialsException;
 import gift.repository.MemberRepository;
@@ -25,7 +25,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public String login(LoginMemberCommand command) {
+    public String login(LoginCommand command) {
         Optional<Member> optionalMember = memberRepository.findByEmail(command.email());
         if (optionalMember.isEmpty() || !BCryptEncryptor.matches(command.password(),
                 optionalMember.get().getPassword())) {

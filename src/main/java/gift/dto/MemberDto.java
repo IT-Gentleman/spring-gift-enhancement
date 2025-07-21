@@ -3,7 +3,7 @@ package gift.dto;
 import gift.entity.Member;
 import gift.entity.Role;
 
-// MemberService -> MemberController
+// MemberService -> Controller
 public record MemberDto(
         Long id,
         String email,
