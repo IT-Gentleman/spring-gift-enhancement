@@ -19,7 +19,7 @@ public class JwtTokenProvider {
 
     public JwtTokenProvider(
             @Value("${jwt.secret-key}") String secret,
-            @Value("${jwt.expire-length}") long validityInMilliseconds
+            @Value("${jwt.expire-length-ms}") long validityInMilliseconds
     ) {
         this.validityInMilliseconds = validityInMilliseconds;
         byte[] keyBytes = Decoders.BASE64.decode(secret);
