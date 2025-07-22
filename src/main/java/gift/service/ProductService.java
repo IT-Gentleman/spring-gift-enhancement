@@ -39,7 +39,7 @@ public class ProductService {
     // Read
     // 동일 패키지 내 사용 제한
     Product findProductByIdAndNotDeleted(Long id) {
-        return productRepository.findByIdAndDeletedIsFalse(id)
+        return productRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
     }
 
@@ -66,7 +66,8 @@ public class ProductService {
     // TODO : validated T/F로 나누지 말고, 위 처럼 whetherDeleted로 나누는 걸로 변경 (findAll 사용)
     @Transactional(readOnly = true)
     public Page<ProductDto> getProductList(Boolean validated, Pageable pageable) {
-        Page<Product> pageProduct = productRepository.findAllByDeletedIsFalseAndValidated(validated,
+        Page<Product> pageProduct = productRepository.findAllByDeletedAtIsNullAndValidated(
+                validated,
                 pageable);
         return pageProduct.map(ProductDto::from);
     }
@@ -87,10 +88,9 @@ public class ProductService {
     }
 
     // Delete
-
     @Transactional
     public void softDeleteProductById(Long id) {
         Product product = findProductByIdAndNotDeleted(id);
-        product.setDeleted(true);
+        product.setDeleted();
     }
 }

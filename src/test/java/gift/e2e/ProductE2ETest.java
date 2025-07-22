@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import gift.config.AuditingTestConfig;
 import gift.dto.CreateProductRequest;
 import gift.dto.PageResponse;
 import gift.dto.ProductResponse;
@@ -22,12 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+@Import(AuditingTestConfig.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductE2ETest {
 
@@ -117,7 +120,8 @@ public class ProductE2ETest {
         @Test
         @DisplayName("POST /api/products - 유효하지 않은 생성 시 400 BAD_REQUEST")
         void 유효하지_않은_생성_시_400_BAD_REQUEST() {
-            CreateProductRequest requestDto = new CreateProductRequest(null, null, null, java.util.Collections.emptyList());
+            CreateProductRequest requestDto = new CreateProductRequest(null, null, null,
+                    java.util.Collections.emptyList());
             assertThatExceptionOfType(HttpClientErrorException.BadRequest.class)
                     .isThrownBy(
                             () ->

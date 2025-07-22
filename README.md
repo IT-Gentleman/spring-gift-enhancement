@@ -173,6 +173,13 @@
         - 현재 Controller 클래스가 궁극적으로 수행하는 것(사용자의 최종 목표)은 인증이라는 관점
     - 추후 회원 본인 정보 조회/수정기능 구현 시, `MemberController` 작성
 
+#### [feat]
+
+- [x] JPA Auditing 적용
+    - soft delete와 hard delete 구분 수행
+    - soft delete 시 `deletedAt` 필드에 삭제시간 기록, deleted 필드 대체. soft delete의 적용범위를 Product에서 Member까지 확대
+    - 생성자, 수정자, 생성시각, 수정시각 필드 추가
+
 ## TODO
 
 ### Whenever is ready
@@ -182,8 +189,6 @@
 #### [feat]
 
 - [ ] 상품 옵션 관리 Admin Page 구현
-- [ ] JPA Auditing 적용
-    - soft delete 시 `deletedAt` 필드에 삭제시간 기록, deleted 필드 대체
 - [ ] 상품 옵션 Ordering 기능 구현
     - 상품 옵션의 순서를 변경할 수 있는 기능 구현
     - 상품 옵션의 최상단은 옵션가 0원이 위치해야하며, 기본선택되어야함

@@ -31,7 +31,8 @@ public class JwtTokenProvider {
         Date expiry = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
-                .subject(member.getEmail())
+                .subject(member.getId().toString())
+                .claim("email", member.getEmail())
                 .claim("role", member.getRole().name())
                 .issuedAt(now)
                 .expiration(expiry)
@@ -39,8 +40,13 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getUsername(String token) {
-        return extractAllClaims(token).getSubject();
+    public Long getId(String token) {
+        String subject = extractAllClaims(token).getSubject();
+        return subject != null ? Long.valueOf(subject) : null;
+    }
+
+    public String getEmail(String token) {
+        return extractAllClaims(token).get("email", String.class);
     }
 
     public String getRole(String token) {

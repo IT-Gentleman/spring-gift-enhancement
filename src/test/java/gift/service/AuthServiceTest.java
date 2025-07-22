@@ -2,9 +2,11 @@ package gift.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import gift.config.AuditingTestConfig;
 import gift.dto.LoginCommand;
 import gift.entity.Member;
 import gift.entity.Role;
@@ -21,9 +23,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
+@Import(AuditingTestConfig.class)
 public class AuthServiceTest {
 
     @Mock
@@ -50,7 +54,8 @@ public class AuthServiceTest {
             String hashedPassword = "hashedPassword";
             Member existingMember = new Member(1L, email, hashedPassword, Role.ROLE_USER);
 
-            when(memberRepository.findByEmail(email)).thenReturn(Optional.of(existingMember));
+            when(memberRepository.findByEmailAndDeletedAtIsNull(email)).thenReturn(
+                    Optional.of(existingMember));
 
             try (MockedStatic<BCryptEncryptor> encryptor = mockStatic(BCryptEncryptor.class)) {
 
@@ -71,7 +76,8 @@ public class AuthServiceTest {
             String rawPassword = "password123456789";
             String hashedPassword = "hashedPassword";
 
-            when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
+            when(memberRepository.findByEmailAndDeletedAtIsNull(email)).thenReturn(
+                    Optional.empty());
 
             assertThrows(InvalidCredentialsException.class,
                     () -> authService.login(new LoginCommand(email, rawPassword)));
@@ -86,7 +92,8 @@ public class AuthServiceTest {
 
             Member existingMember = new Member(1L, email, hashedPassword, Role.ROLE_USER);
 
-            when(memberRepository.findByEmail(email)).thenReturn(Optional.of(existingMember));
+            when(memberRepository.findByEmailAndDeletedAtIsNull(email)).thenReturn(
+                    Optional.of(existingMember));
 
             try (MockedStatic<BCryptEncryptor> encryptor = mockStatic(BCryptEncryptor.class)) {
 
@@ -111,8 +118,9 @@ public class AuthServiceTest {
             String token = "validToken";
             Member member = new Member(1L, "email", "hashedPassword", Role.ROLE_USER);
             when(jwtTokenProvider.validateToken(token)).thenReturn(true);
-            when(jwtTokenProvider.getUsername(token)).thenReturn(username);
-            when(memberRepository.findByEmail(username)).thenReturn(Optional.of(member));
+            when(jwtTokenProvider.getId(token)).thenReturn(member.getId());
+            when(memberRepository.findById(member.getId())).thenReturn(
+                    Optional.of(member));
             assertThat(authService.getAuthenticationFromToken(token)).isNotNull();
         }
 
@@ -131,8 +139,9 @@ public class AuthServiceTest {
             String username = "deletedMember@email.com";
             String token = "validToken";
             when(jwtTokenProvider.validateToken(token)).thenReturn(true);
-            when(jwtTokenProvider.getUsername(token)).thenReturn(username);
-            when(memberRepository.findByEmail(username)).thenReturn(Optional.empty());
+            when(jwtTokenProvider.getId(token)).thenReturn(null);
+            when(memberRepository.findById(any())).thenReturn(
+                    Optional.empty());
             assertThrows(ResponseStatusException.class,
                     () -> authService.getAuthenticationFromToken(token));
         }

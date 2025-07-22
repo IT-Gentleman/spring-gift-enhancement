@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import gift.config.AuditingTestConfig;
 import gift.entity.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,9 +12,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 
 @DataJpaTest
+@Import(AuditingTestConfig.class)
 class ProductRepositoryTest {
 
     @Autowired
@@ -85,51 +88,48 @@ class ProductRepositoryTest {
                     "http://kakao.com", null, false);
             assertThrows(DataIntegrityViolationException.class,
                     () -> productRepository.save(validatedNullProduct));
-
-            // 명시적 deleted=null 사용 시 nullable 위반. 생성자에서 deleted 비명시 시 자동 false로 설정됨
-            Product deletedNullProduct = new Product(null, "Test Product", 5000, "http://kakao.com",
-                    true, null);
-            assertThrows(DataIntegrityViolationException.class,
-                    () -> productRepository.save(deletedNullProduct));
         }
     }
 
     @Nested
-    @DisplayName("Optional<Product> findByIdAndDeletedIsFalse(Long id) - 일반사용자 상품 조회 테스트")
+    @DisplayName("Optional<Product> findByIdAndDeletedAtIsNull(Long id) - 일반사용자 상품 조회 테스트")
     class findByIdTests {
 
         @Test
         @DisplayName("삭제되지 않은 상품의 ID로 조회 시 상품 반환")
         void 존재하는_상품의_ID로_조회_시_상품반환() {
-            assertThat(productRepository.findByIdAndDeletedIsFalse(
+            assertThat(productRepository.findByIdAndDeletedAtIsNull(
                     existingProduct.getId())).isPresent();
         }
 
         @Test
         @DisplayName("삭제된 상품의 ID로 조회 시 빈 Optional 반환")
         void 삭제된_상품의_ID로_조회_시_빈Optional반환() {
-            existingProduct.setDeleted(true);
+            existingProduct.setDeleted();
             assertThat(
-                    productRepository.findByIdAndDeletedIsFalse(existingProduct.getId())).isEmpty();
+                    productRepository.findByIdAndDeletedAtIsNull(
+                            existingProduct.getId())).isEmpty();
         }
 
         @Test
         @DisplayName("존재하지 않는 상품의 ID로 조회 시 빈 Optional 반환")
         void 존재하지_않는_상품의_ID로_조회_시_빈Optional반환() {
-            assertThat(productRepository.findByIdAndDeletedIsFalse(500L)).isEmpty();
+            assertThat(productRepository.findByIdAndDeletedAtIsNull(500L)).isEmpty();
         }
     }
 
     @Nested
-    @DisplayName("List<Product> findAllByDeletedIsFalseAndValidated(Boolean visibility) - 상품 목록 조회 테스트 (visibility=false is used only for MD)")
+    @DisplayName("List<Product> findAllByDeletedAtIsNullAndValidated(Boolean visibility) - 상품 목록 조회 테스트 (visibility=false is used only for MD)")
     class findAllByValidatedTests {
 
         @Test
         @DisplayName("deleted가 false이며 validated가 true인 상품 목록 조회 시 정상 반환")
         void deleted가_false이며_validated가_true인_상품_목록_조회_시_정상반환() {
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(true, null)).hasSize(
+            assertThat(
+                    productRepository.findAllByDeletedAtIsNullAndValidated(true, null)).hasSize(
                     1);
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(false, null)).hasSize(
+            assertThat(
+                    productRepository.findAllByDeletedAtIsNullAndValidated(false, null)).hasSize(
                     0);
         }
 
@@ -137,19 +137,23 @@ class ProductRepositoryTest {
         @DisplayName("validated가 false인 상품은 목록에 포함되지 않음")
         void deleted가_false이며_validated가_false인_상품_추가_후_상품_목록_조회_시_정상반환() {
             existingProduct.setValidated(false);
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(true, null)).hasSize(
+            assertThat(
+                    productRepository.findAllByDeletedAtIsNullAndValidated(true, null)).hasSize(
                     0);
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(false, null)).hasSize(
+            assertThat(
+                    productRepository.findAllByDeletedAtIsNullAndValidated(false, null)).hasSize(
                     1);
         }
 
         @Test
         @DisplayName("deleted가 true인 상품은 목록에 포함되지 않음")
         void deleted가_true인_상품은_목록에_포함되지_않음() {
-            existingProduct.setDeleted(true);
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(true, null)).hasSize(
+            existingProduct.setDeleted();
+            assertThat(
+                    productRepository.findAllByDeletedAtIsNullAndValidated(true, null)).hasSize(
                     0);
-            assertThat(productRepository.findAllByDeletedIsFalseAndValidated(false, null)).hasSize(
+            assertThat(
+                    productRepository.findAllByDeletedAtIsNullAndValidated(false, null)).hasSize(
                     0);
         }
 

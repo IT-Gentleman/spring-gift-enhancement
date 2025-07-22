@@ -2,15 +2,18 @@ package gift.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.List;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table
-public class Member {
+@EntityListeners(AuditingEntityListener.class)
+public class Member extends SoftDeleteEntity {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
@@ -91,6 +94,7 @@ public class Member {
         }
     }
 
+    // 순환참조를 방지하기 위해 사용
     public static Member emptyOfId(Long id) {
         Member member = new Member();
         member.id = id;

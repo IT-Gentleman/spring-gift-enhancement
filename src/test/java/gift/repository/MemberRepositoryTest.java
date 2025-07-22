@@ -96,54 +96,37 @@ class MemberRepositoryTest {
     }
 
     @Nested
-    @DisplayName("Optional<Member> findByIdentifyNumber() - 멤버 조회 테스트")
-    class findByIdentifyNumberTests {
+    @DisplayName("Optional<Member> findById() - 멤버 조회 테스트")
+    class findByIdTests {
 
         @Test
-        @DisplayName("존재하는 멤버의 식별번호로 조회 시 멤버 반환")
-        void 존재하는_멤버의_식별번호로_조회_시_멤버반환() {
+        @DisplayName("존재하는 멤버의 ID로 조회 시 멤버 반환")
+        void 존재하는_멤버의_ID로_조회_시_멤버반환() {
             assertThat(memberRepository.findById(existingMember.getId())).isPresent();
         }
 
         @Test
-        @DisplayName("존재하지 않는 식별번호로 조회 시 빈 Optional 반환")
-        void 존재하지_않는_식별번호로_조회_시_빈Optional반환() {
+        @DisplayName("존재하지 않는 ID로 조회 시 빈 Optional 반환")
+        void 존재하지_않는_ID로_조회_시_빈Optional반환() {
             assertThat(memberRepository.findById(500L)).isEmpty();
         }
     }
 
     @Nested
-    @DisplayName("Optional<Member> findByEmail() - 멤버 조회 테스트")
-    class findByEmailTests {
+    @DisplayName("void deleteById() - 멤버 삭제 테스트")
+    class deleteByIdTests {
 
         @Test
-        @DisplayName("존재하는 멤버의 이메일로 조회 시 멤버 반환")
-        void 존재하는_멤버의_이메일로_조회_시_멤버반환() {
-            assertThat(memberRepository.findByEmail(existingMember.getEmail())).isPresent();
-        }
-
-        @Test
-        @DisplayName("존재하지 않는 이메일로 조회 시 빈 Optional 반환")
-        void 존재하지_않는_이메일로_조회_시_빈Optional반환() {
-            assertThat(memberRepository.findByEmail("notExisting@email.com")).isEmpty();
-        }
-    }
-
-    @Nested
-    @DisplayName("boolean deleteByIdentifyNumber() - 멤버 삭제 테스트")
-    class deleteByIdentifyNumberTests {
-
-        @Test
-        @DisplayName("존재하는 멤버의 식별번호로 삭제 시 삭제")
-        void 존재하는_멤버의_식별번호로_삭제_시_삭제() {
+        @DisplayName("존재하는 멤버의 ID로 삭제 시 삭제")
+        void 존재하는_멤버의_ID로_삭제_시_삭제() {
             assertThat(memberRepository.findById(existingMember.getId())).isPresent();
             memberRepository.deleteById(existingMember.getId());
             assertThat(memberRepository.findById(existingMember.getId())).isEmpty();
         }
 
         @Test
-        @DisplayName("존재하지 않는 식별번호로 삭제 시 미삭제")
-        void 존재하지_않는_식별번호로_삭제_시_미삭제() {
+        @DisplayName("존재하지 않는 ID로 삭제 시 미삭제")
+        void 존재하지_않는_ID로_삭제_시_미삭제() {
             assertThat(memberRepository.findById(existingMember.getId())).isPresent();
             memberRepository.deleteById(500L);
             assertThat(memberRepository.findById(existingMember.getId())).isPresent();

@@ -39,12 +39,12 @@ public class MemberService {
     // 동일 패키지 내 사용 제한
     Member findMemberById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Member not found: id=" + id));
+                .orElseThrow(() -> new NotFoundException("Member not found or deleted: id=" + id));
     }
 
     @Transactional(readOnly = true)
     public Page<MemberDto> getMemberList(Pageable pageable) {
-        Page<Member> memberPage = memberRepository.findAll(pageable);
+        Page<Member> memberPage = memberRepository.findAllByDeletedAtIsNull(pageable);
         return memberPage.map(MemberDto::from);
     }
 
@@ -76,9 +76,7 @@ public class MemberService {
     // Delete
     @Transactional
     public void deleteMember(Long id) {
-        if (!memberRepository.existsById(id)) {
-            throw new NotFoundException("Member not found: id=" + id);
-        }
-        memberRepository.deleteById(id);
+        Member member = findMemberById(id);
+        member.setDeleted(); // soft delete
     }
 }

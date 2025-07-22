@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import gift.config.AuditingTestConfig;
 import gift.dto.LoginRequest;
 import gift.dto.LoginResponse;
 import gift.dto.RegisterMemberRequest;
@@ -17,12 +18,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(AuditingTestConfig.class)
 class AuthE2ETest {
 
     private final String baseUrl = "http://localhost:";
@@ -49,7 +52,7 @@ class AuthE2ETest {
     @DisplayName("POST /api/members/register - 회원가입 테스트")
     class Register {
 
-        String url = baseUrl + port + "/api/members/register";
+        String url = baseUrl + port + "/api/auth/register";
 
         @Test
         @DisplayName("POST /api/members/register - 유효한 정보 입력 시 201 CREATED")
@@ -127,8 +130,8 @@ class AuthE2ETest {
     @DisplayName("POST /api/members/login - 로그인 테스트")
     class Login {
 
-        String registerUrl = baseUrl + port + "/api/members/register";
-        String loginUrl = baseUrl + port + "/api/members/login";
+        String registerUrl = baseUrl + port + "/api/auth/register";
+        String loginUrl = baseUrl + port + "/api/auth/login";
         String userEmail = "existing@example.com";
         String userPassword = "password123456789";
 

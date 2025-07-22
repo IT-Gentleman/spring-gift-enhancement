@@ -6,6 +6,7 @@ import gift.exception.NotFoundException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -13,10 +14,12 @@ import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table
-public class Product {
+@EntityListeners(AuditingEntityListener.class)
+public class Product extends SoftDeleteEntity {
 
     private static final List<String> prohibitedNames = List.of("카카오");
 
@@ -39,9 +42,6 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ProductOption> optionList = new ArrayList<>();
 
-    @Column(nullable = false)
-    private Boolean deleted = false;
-
     // non-argument constructor for JPA
     protected Product() {
     }
@@ -54,7 +54,9 @@ public class Product {
         this.price = price;
         this.imageUrl = imageUrl;
         this.validated = validated;
-        this.deleted = deleted;
+        if (deleted != null && deleted) {
+            super.setDeleted();
+        }
     }
 
     // constructor for product creation. use as a factory method
@@ -133,14 +135,6 @@ public class Product {
 
     public Boolean isValidated() {
         return validated;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    public Boolean isDeleted() {
-        return deleted;
     }
 
     public void applyPatch(String name, Integer price, String imageUrl) {

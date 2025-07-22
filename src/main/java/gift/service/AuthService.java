@@ -26,7 +26,8 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public String login(LoginCommand command) {
-        Optional<Member> optionalMember = memberRepository.findByEmail(command.email());
+        Optional<Member> optionalMember = memberRepository.findByEmailAndDeletedAtIsNull(
+                command.email());
         if (optionalMember.isEmpty() || !BCryptEncryptor.matches(command.password(),
                 optionalMember.get().getPassword())) {
             throw new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다.");
@@ -39,8 +40,8 @@ public class AuthService {
         if (token == null || !jwtTokenProvider.validateToken(token)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
-        String username = jwtTokenProvider.getUsername(token);
-        Optional<Member> optionalMember = memberRepository.findByEmail(username);
+        Long memberId = jwtTokenProvider.getId(token);
+        Optional<Member> optionalMember = memberRepository.findById(memberId);
         if (optionalMember.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }

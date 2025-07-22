@@ -38,7 +38,8 @@ class ProductServiceTest {
             String name = "Test Product";
             Integer price = 10000;
             String imageUrl = "http://example.com/image.jpg";
-            var options = java.util.List.of(new gift.dto.NewProductOptionCommand("Option 1", 10, null));
+            var options = java.util.List.of(
+                    new gift.dto.NewProductOptionCommand("Option 1", 10, null));
             Product expectedProduct = new Product(1L, name, price, imageUrl, false, false);
             when(productRepository.save(any(Product.class))).thenReturn(expectedProduct);
 
@@ -51,7 +52,8 @@ class ProductServiceTest {
         @Test
         @DisplayName("옵션 없이 상품 생성 시 BadRequestException 발생")
         void createProductWithoutOptions_ThrowsBadRequestException() {
-            NewProductCommand command = new NewProductCommand("Test", 100, "url", java.util.Collections.emptyList());
+            NewProductCommand command = new NewProductCommand("Test", 100, "url",
+                    java.util.Collections.emptyList());
 
             assertThrows(gift.exception.BadRequestException.class, () -> {
                 productService.createProduct(command);
@@ -69,7 +71,7 @@ class ProductServiceTest {
             Long productId = 1L;
             Product expectedProduct = new Product(productId, "Test Product", 10000,
                     "http://example.com/image.jpg", false, false);
-            when(productRepository.findByIdAndDeletedIsFalse(productId)).thenReturn(
+            when(productRepository.findByIdAndDeletedAtIsNull(productId)).thenReturn(
                     Optional.of(expectedProduct));
 
             assertThat(productService.getProductById(productId)).isEqualTo(
@@ -80,7 +82,7 @@ class ProductServiceTest {
         @DisplayName("존재하지 않는 상품 ID로 조회 시 예외 발생")
         void 존재하지않는상품ID로조회시_예외발생() {
             Long productId = 999L;
-            when(productRepository.findByIdAndDeletedIsFalse(productId)).thenReturn(
+            when(productRepository.findByIdAndDeletedAtIsNull(productId)).thenReturn(
                     Optional.empty());
 
             assertThrows(NotFoundException.class, () -> productService.getProductById(productId));
