@@ -1,5 +1,10 @@
 package gift.e2e;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+import gift.config.AuditingTestConfig;
 import gift.dto.CreateProductRequest;
 import gift.dto.PageResponse;
 import gift.dto.ProductResponse;
@@ -18,16 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
+@Import(AuditingTestConfig.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductE2ETest {
 
@@ -52,9 +55,11 @@ public class ProductE2ETest {
     @BeforeEach
     void setUp() {
         restClient = RestClient.create();
-        Member md = memberRepository.save(new Member(null, "md@example.com", "mdpassword123456789", Role.ROLE_MD));
+        Member md = memberRepository.save(
+                new Member(null, "md@example.com", "mdpassword123456789", Role.ROLE_MD));
         mdToken = jwtTokenProvider.createToken(md);
-        savedProduct = productRepository.save(new Product(null, "Initial Product", 10000, "initial.jpg", true, false));
+        savedProduct = productRepository.save(
+                new Product(null, "Initial Product", 10000, "initial.jpg", true, false));
     }
 
     @AfterEach
@@ -66,15 +71,18 @@ public class ProductE2ETest {
     @Nested
     @DisplayName("POST /api/products - 상품생성 테스트")
     class CreateProduct {
+
         String url = baseUrl + port + "/api/products";
 
         @Test
         @DisplayName("POST /api/products - 유효한 생성 시 201 CREATED")
         void 유효한_생성_시_201_CREATED() {
+            var options = java.util.List.of(new gift.dto.AddProductOptionRequest("Option 1", 10));
             CreateProductRequest requestDto = new CreateProductRequest(
                     "아이스 카페 아메리카노 T",
                     4700,
-                    "https://st.kakaocdn.net/product/gift/product/20231010111814_9a667f9eccc943648797925498bdd8a3.jpg"
+                    "https://st.kakaocdn.net/product/gift/product/20231010111814_9a667f9eccc943648797925498bdd8a3.jpg",
+                    options
             );
             ResponseEntity<ProductResponse> response = restClient.post()
                     .uri(url)
@@ -89,9 +97,31 @@ public class ProductE2ETest {
         }
 
         @Test
+        @DisplayName("POST /api/products - 옵션 없이 생성 시 400 BAD_REQUEST")
+        void 옵션_없이_생성_시_400_BAD_REQUEST() {
+            CreateProductRequest requestDto = new CreateProductRequest(
+                    "Test Product",
+                    1000,
+                    "test.jpg",
+                    java.util.Collections.emptyList()
+            );
+            assertThatExceptionOfType(HttpClientErrorException.BadRequest.class)
+                    .isThrownBy(
+                            () ->
+                                    restClient.post()
+                                            .uri(url)
+                                            .header("Authorization", "Bearer " + mdToken)
+                                            .body(requestDto)
+                                            .retrieve()
+                                            .toEntity(Void.class)
+                    );
+        }
+
+        @Test
         @DisplayName("POST /api/products - 유효하지 않은 생성 시 400 BAD_REQUEST")
         void 유효하지_않은_생성_시_400_BAD_REQUEST() {
-            CreateProductRequest requestDto = new CreateProductRequest(null, null, null);
+            CreateProductRequest requestDto = new CreateProductRequest(null, null, null,
+                    java.util.Collections.emptyList());
             assertThatExceptionOfType(HttpClientErrorException.BadRequest.class)
                     .isThrownBy(
                             () ->
@@ -108,6 +138,7 @@ public class ProductE2ETest {
     @Nested
     @DisplayName("GET /api/products/{id} - 상품조회 테스트")
     class GetProduct {
+
         @Test
         @DisplayName("GET /api/products/{id} - 유효한 조회 시 200 OK")
         void 유효한_조회_시_200_OK() {
@@ -142,6 +173,7 @@ public class ProductE2ETest {
     @Nested
     @DisplayName("PATCH /api/products/{id} - 상품수정 테스트")
     class UpdateProduct {
+
         @Test
         @DisplayName("PATCH /api/products/{id} - 유효한 수정 시 200 OK")
         void 유효한_수정_시_200_OK() {
@@ -194,7 +226,8 @@ public class ProductE2ETest {
                 .uri(url)
                 .header("Authorization", "Bearer " + mdToken)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<>() {});
+                .toEntity(new ParameterizedTypeReference<>() {
+                });
 
         assertAll(
                 () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
@@ -205,6 +238,7 @@ public class ProductE2ETest {
     @Nested
     @DisplayName("DELETE /api/products/{id} - 상품삭제 테스트")
     class DeleteProduct {
+
         @Test
         @DisplayName("DELETE /api/products/{id} - 유효한 삭제 시 204 NO_CONTENT")
         void 유효한_삭제_시_204_NO_CONTENT() {

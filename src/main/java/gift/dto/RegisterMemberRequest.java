@@ -14,6 +14,7 @@ public record RegisterMemberRequest(
         @Size(min = 15, max = 64, message = "비밀번호는 15자 이상 64자 이내여야 합니다.")
         String password
 ) {
+
     public static RegisterMemberRequest empty() {
         return new RegisterMemberRequest("", "");
     }

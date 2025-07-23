@@ -1,16 +1,17 @@
 package gift.service;
 
+import gift.dto.NewProductCommand;
+import gift.dto.ProductDto;
+import gift.dto.UpdateProductCommand;
 import gift.entity.Product;
+import gift.entity.ProductOption;
+import gift.exception.BadRequestException;
 import gift.exception.NotFoundException;
 import gift.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -21,54 +22,75 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
+    // Create
     @Transactional
-    public Product createProduct(String name, Integer price, String imageUrl) {
-        Product product = new Product(name, price, imageUrl);
-        return productRepository.save(product);
+    public ProductDto createProduct(NewProductCommand command) {
+        if (command.options().isEmpty()) {
+            throw new BadRequestException("Product must have at least one option.");
+        }
+        Product product = new Product(command.name(), command.price(), command.imageUrl(),
+                command.options().stream().map(
+                                option -> new ProductOption(option.name(), option.quantity(), null))
+                        .toList()
+        );
+        return ProductDto.from(productRepository.save(product));
+    }
+
+    // Read
+    // 동일 패키지 내 사용 제한
+    Product findProductByIdAndNotDeleted(Long id) {
+        return productRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
+    }
+
+    // 동일 패키지 내 사용 제한
+    Product findProductByIdIncludingDeleted(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product not found: id=" + id));
     }
 
     // for normal users
     @Transactional(readOnly = true)
-    public Product getProductById(Long id) {
-        Optional<Product> optionalProduct = productRepository.findByIdAndDeletedIsFalse(id);
-        if (optionalProduct.isEmpty()) {
-            throw new NotFoundException("Product not found");
-        }
-        return optionalProduct.get();
+    public ProductDto getProductById(Long id) {
+        Product product = findProductByIdAndNotDeleted(id);
+        return ProductDto.from(product);
     }
 
     // for md users
     @Transactional(readOnly = true)
-    public Product getProductWhetherDeletedById(Long id) {
-        Optional<Product> optionalProduct = productRepository.findById(id);
-        if (optionalProduct.isEmpty()) {
-            throw new NotFoundException("Product not found");
-        }
-        return optionalProduct.get();
+    public ProductDto getProductWhetherDeletedById(Long id) {
+        Product product = findProductByIdIncludingDeleted(id);
+        return ProductDto.from(product);
     }
 
     // TODO : validated T/F로 나누지 말고, 위 처럼 whetherDeleted로 나누는 걸로 변경 (findAll 사용)
     @Transactional(readOnly = true)
-    public Page<Product> getProductList(Boolean validated, Pageable pageable) {
-        return productRepository.findAllByDeletedIsFalseAndValidated(validated, pageable);
+    public Page<ProductDto> getProductList(Boolean validated, Pageable pageable) {
+        Page<Product> pageProduct = productRepository.findAllByDeletedAtIsNullAndValidated(
+                validated,
+                pageable);
+        return pageProduct.map(ProductDto::from);
     }
 
+    // Update
+
     @Transactional
-    public Product updateProductById(Long id, String name, Integer price, String imageUrl) {
-        Product product = getProductById(id);
-        product.applyPatch(name, price, imageUrl);
-        return product;
+    public ProductDto updateProductById(UpdateProductCommand command) {
+        Product product = findProductByIdAndNotDeleted(command.id());
+        product.applyPatch(command.name(), command.price(), command.imageUrl());
+        return ProductDto.from(product);
     }
 
     @Transactional
     public void setProductValidated(Long id, Boolean validated) {
-        Product product = getProductById(id);
+        Product product = findProductByIdAndNotDeleted(id);
         product.setValidated(validated);
     }
 
+    // Delete
     @Transactional
     public void softDeleteProductById(Long id) {
-        Product product = getProductById(id);
-        product.setDeleted(true);
+        Product product = findProductByIdAndNotDeleted(id);
+        product.setDeleted();
     }
 }

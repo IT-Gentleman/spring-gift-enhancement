@@ -49,14 +49,29 @@
       <td><pre><code>{
   "name": "(String, NotNull, max=15, pattern)",
   "price": "(Integer, NotNull, Positive)",
-  "imageUrl": "(String, NotNull, max=255)"
-}</code></pre></td>
+  "imageUrl": "(String, NotNull, max=255)",
+  "options": [
+    {
+      "name": "(String, NotNull)",
+      "quantity": "(Integer, NotNull, Positive)"
+    }
+  ]
+}</code></pre>
+(At least one option is required)</td>
       <td><pre><code>{
   "id": "(Long)",
   "name": "(String)",
   "price": "(Integer)",
   "imageUrl": "(String)",
-  "validated": "(Boolean)"
+  "validated": "(Boolean)",
+  "productOptions": [
+    {
+      "id": "(Long)",
+      "name": "(String)",
+      "quantity": "(Integer)",
+      "productId": "(Long)"
+    }
+  ]
 }</code></pre></td>
     </tr>
     <tr>
@@ -70,7 +85,15 @@
   "name": "(String)",
   "price": "(Integer)",
   "imageUrl": "(String)",
-  "validated": "(Boolean)"
+  "validated": "(Boolean)",
+  "productOptions": [
+    {
+      "id": "(Long)",
+      "name": "(String)",
+      "quantity": "(Integer)",
+      "productId": "(Long)"
+    }
+  ]
 }</code></pre></td>
     </tr>
     <tr>
@@ -89,7 +112,15 @@
       "name": "(String)",
       "price": "(Integer)",
       "imageUrl": "(String)",
-      "validated": "(Boolean)"
+      "validated": "(Boolean)",
+      "productOptions": [
+        {
+          "id": "(Long)",
+          "name": "(String)",
+          "quantity": "(Integer)",
+          "productId": "(Long)"
+        }
+      ]
     }
   ],
   "number": "(Integer)",
@@ -116,7 +147,15 @@
   "name": "(String)",
   "price": "(Integer)",
   "imageUrl": "(String)",
-  "validated": "(Boolean)"
+  "validated": "(Boolean)",
+  "productOptions": [
+    {
+      "id": "(Long)",
+      "name": "(String)",
+      "quantity": "(Integer)",
+      "productId": "(Long)"
+    }
+  ]
 }</code></pre></td>
     </tr>
     <tr>
@@ -177,6 +216,59 @@
       <td>/api/wishlist/{productId}</td>
       <td>위시리스트에서 상품 삭제</td>
       <td>(Anyone Validated)</td>
+      <td>없음</td>
+      <td>(No Content)</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>/api/products/{productId}/options</td>
+      <td>상품 옵션 추가</td>
+      <td>ROLE_MD</td>
+      <td><pre><code>{
+  "name": "(String, NotNull)",
+  "quantity": "(Integer, NotNull, Positive)"
+}</code></pre></td>
+      <td><pre><code>{
+  "id": "(Long)",
+  "name": "(String)",
+  "quantity": "(Integer)",
+  "productId": "(Long)"
+}</code></pre></td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/api/products/{productId}/options/{optionId}</td>
+      <td>상품 옵션 조회</td>
+      <td>(Anyone)</td>
+      <td>없음</td>
+      <td><pre><code>{
+  "id": "(Long)",
+  "name": "(String)",
+  "quantity": "(Integer)",
+  "productId": "(Long)"
+}</code></pre></td>
+    </tr>
+    <tr>
+      <td>PATCH</td>
+      <td>/api/products/{productId}/options/{optionId}</td>
+      <td>상품 옵션 수정</td>
+      <td>ROLE_MD</td>
+      <td><pre><code>{
+  "name": "(String, Nullable)",
+  "quantity": "(Integer, Nullable, PositiveOrZero)"
+}</code></pre></td>
+      <td><pre><code>{
+  "id": "(Long)",
+  "name": "(String)",
+  "quantity": "(Integer)",
+  "productId": "(Long)"
+}</code></pre></td>
+    </tr>
+    <tr>
+      <td>DELETE</td>
+      <td>/api/products/{productId}/options/{optionId}</td>
+      <td>상품 옵션 삭제</td>
+      <td>ROLE_MD</td>
       <td>없음</td>
       <td>(No Content)</td>
     </tr>

@@ -1,10 +1,10 @@
 package gift.dto;
 
 import gift.entity.Wish;
-
 import java.time.LocalDateTime;
 
-public record WishItemResponse(
+// WishService -> WishController
+public record WishDto(
         Long id,
         Long productId,
         String productName,
@@ -12,8 +12,9 @@ public record WishItemResponse(
         Boolean deleted,
         LocalDateTime addedAt
 ) {
-    public static WishItemResponse from(Wish wish) {
-        return new WishItemResponse(
+
+    public static WishDto from(Wish wish) {
+        return new WishDto(
                 wish.getId(),
                 wish.getProduct().getId(),
                 wish.getProduct().getName(),

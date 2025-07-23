@@ -15,7 +15,8 @@ public class ProductAdminPageControllerExceptionHandler {
     private final String mainPage = "/admin/products";
 
     @ExceptionHandler(NotFoundException.class)
-    public String handleNotFoundException(NotFoundException ex, Model model, HttpServletRequest request) {
+    public String handleNotFoundException(NotFoundException ex, Model model,
+            HttpServletRequest request) {
         String errorMessage = "Product not found : 유효하지 않은 상품ID로 접근하였습니다.\n" + ex.getMessage();
         model.addAttribute("errorMessage", errorMessage);
         String referer = request.getHeader("Referer");

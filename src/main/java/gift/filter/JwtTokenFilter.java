@@ -1,15 +1,17 @@
 package gift.filter;
 
 import gift.token.JwtTokenProvider;
-import jakarta.servlet.*;
+import gift.util.LoginMemberContextHolder;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.util.WebUtils;
-
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.WebUtils;
 
-// 1. extracting JWT Token from the request and validating it
-public class JwtTokenFilter implements Filter {
+public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -18,19 +20,21 @@ public class JwtTokenFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+            FilterChain chain) throws ServletException, IOException {
 
-        String token = Optional.ofNullable(getTokenFromCookies(httpRequest))
-                .orElse(getTokenFromAuthorizationHeader(httpRequest));
+        String token = Optional.ofNullable(getTokenFromCookies(request))
+                .orElse(getTokenFromAuthorizationHeader(request));
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            httpRequest.setAttribute("username", jwtTokenProvider.getUsername(token));
-            httpRequest.setAttribute("role", jwtTokenProvider.getRole(token));
+            LoginMemberContextHolder.set(jwtTokenProvider.getId(token));
+            request.setAttribute("username", jwtTokenProvider.getEmail(token));
+            request.setAttribute("role", jwtTokenProvider.getRole(token));
         } else {
-            httpRequest.setAttribute("username", null);
-            httpRequest.setAttribute("role", null);
+            request.setAttribute("username", null);
+            request.setAttribute("role", null);
         }
         chain.doFilter(request, response);
+        LoginMemberContextHolder.clear();
     }
 
     private String getTokenFromCookies(HttpServletRequest request) {

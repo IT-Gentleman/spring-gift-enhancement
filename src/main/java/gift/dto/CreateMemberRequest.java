@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 // for Admin Page. Authority is required.
-public record CreateMemberRequest (
+public record CreateMemberRequest(
         @NotNull(message = "이메일은 제시되어야합니다.")
         @Email(message = "올바른 이메일 양식이 아닙니다.")
         String email,
@@ -18,6 +18,7 @@ public record CreateMemberRequest (
         @NotNull(message = "권한은 제시되어야합니다.")
         Role role
 ) {
+
     public static CreateMemberRequest empty() {
         return new CreateMemberRequest("", "", Role.ROLE_USER);
     }

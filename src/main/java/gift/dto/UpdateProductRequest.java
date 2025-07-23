@@ -1,6 +1,5 @@
 package gift.dto;
 
-import gift.entity.Product;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -23,14 +22,16 @@ public record UpdateProductRequest(
         @Size(min = 0, max = 255, message = "상품 이미지 URL은 255자 이내여야 합니다.")
         String imageUrl
 ) {
+
     public static UpdateProductRequest empty() {
         return new UpdateProductRequest("", 1, "");
     }
-    public static UpdateProductRequest from(Product product) {
+
+    public static UpdateProductRequest from(ProductDto productDto) {
         return new UpdateProductRequest(
-                product.getName(),
-                product.getPrice(),
-                product.getImageUrl()
+                productDto.name(),
+                productDto.price(),
+                productDto.imageUrl()
         );
     }
 }

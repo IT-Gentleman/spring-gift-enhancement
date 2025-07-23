@@ -1,17 +1,16 @@
 package gift.dto;
 
-import gift.entity.Member;
-
-public record MemberResponse (
+public record MemberResponse(
         Long id,
         String email,
         String role
 ) {
-    public static MemberResponse from(Member member) {
+
+    public static MemberResponse from(MemberDto memberDto) {
         return new MemberResponse(
-                member.getId(),
-                member.getEmail(),
-                member.getRole().name()
+                memberDto.id(),
+                memberDto.email(),
+                memberDto.role().name()
         );
     }
 }

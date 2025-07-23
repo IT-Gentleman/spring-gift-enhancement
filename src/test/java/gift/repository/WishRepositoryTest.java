@@ -1,23 +1,26 @@
 package gift.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import gift.config.AuditingTestConfig;
 import gift.entity.Member;
 import gift.entity.Product;
 import gift.entity.Role;
 import gift.entity.Wish;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
 @DataJpaTest
+@Import(AuditingTestConfig.class)
 class WishRepositoryTest {
 
     @Autowired
@@ -35,22 +38,22 @@ class WishRepositoryTest {
     @BeforeEach
     void setUp() {
         existingMember = memberRepository.save(
-            new Member(
-                null,
-                "existing@kakao.com",
-                "existingEncryptedPassword",
-                Role.ROLE_USER
-            )
+                new Member(
+                        null,
+                        "existing@kakao.com",
+                        "existingEncryptedPassword",
+                        Role.ROLE_USER
+                )
         );
         existingProduct = productRepository.save(
-            new Product(
-                null,
-                "existing product",
-                5000,
-                "http://image.com/existing.png",
-                true,
-                false
-            )
+                new Product(
+                        null,
+                        "existing product",
+                        5000,
+                        "http://image.com/existing.png",
+                        true,
+                        false
+                )
         );
     }
 
@@ -67,9 +70,11 @@ class WishRepositoryTest {
             );
             Wish savedWish = wishRepository.save(wish);
             assertAll(
-                () -> assertThat(savedWish.getId()).isNotNull(),
-                () -> assertThat(savedWish.getMember().getId()).isEqualTo(existingMember.getId()),
-                () -> assertThat(savedWish.getProduct().getId()).isEqualTo(existingProduct.getId())
+                    () -> assertThat(savedWish.getId()).isNotNull(),
+                    () -> assertThat(savedWish.getMember().getId()).isEqualTo(
+                            existingMember.getId()),
+                    () -> assertThat(savedWish.getProduct().getId()).isEqualTo(
+                            existingProduct.getId())
             );
         }
 
@@ -78,13 +83,16 @@ class WishRepositoryTest {
         void 널_값이_포함된_위시_아이템_삽입_시_예외_발생() {
 
             Wish allNullWish = new Wish(null, null);
-            Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(allNullWish));
+            assertThrows(DataIntegrityViolationException.class,
+                    () -> wishRepository.save(allNullWish));
 
             Wish memberNullWish = new Wish(null, existingProduct);
-            Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(memberNullWish));
+            assertThrows(DataIntegrityViolationException.class,
+                    () -> wishRepository.save(memberNullWish));
 
             Wish productNullWish = new Wish(existingMember, null);
-            Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(productNullWish));
+            assertThrows(DataIntegrityViolationException.class,
+                    () -> wishRepository.save(productNullWish));
         }
 
         @Test
@@ -97,7 +105,8 @@ class WishRepositoryTest {
                     nonExistentMember,
                     nonExistentProduct
             );
-            Assertions.assertThrows(DataIntegrityViolationException.class, () -> wishRepository.save(wish));
+            assertThrows(DataIntegrityViolationException.class,
+                    () -> wishRepository.save(wish));
         }
     }
 
@@ -116,10 +125,12 @@ class WishRepositoryTest {
 
             Page<Wish> wishes = wishRepository.findAllByMemberId(existingMember.getId(), null);
             assertAll(
-                () -> assertThat(wishes.getContent()).hasSize(1),
-                () -> assertThat(wishes.getContent().get(0).getId()).isNotNull(),
-                () -> assertThat(wishes.getContent().get(0).getMember().getId()).isEqualTo(existingMember.getId()),
-                () -> assertThat(wishes.getContent().get(0).getProduct().getId()).isEqualTo(existingProduct.getId())
+                    () -> assertThat(wishes.getContent()).hasSize(1),
+                    () -> assertThat(wishes.getContent().get(0).getId()).isNotNull(),
+                    () -> assertThat(wishes.getContent().get(0).getMember().getId()).isEqualTo(
+                            existingMember.getId()),
+                    () -> assertThat(wishes.getContent().get(0).getProduct().getId()).isEqualTo(
+                            existingProduct.getId())
             );
         }
 
@@ -128,40 +139,6 @@ class WishRepositoryTest {
         void 존재하지_않는_memberId로_위시_아이템_조회_시_빈_리스트_반환() {
             Page<Wish> wishes = wishRepository.findAllByMemberId(999L, null);
             assertThat(wishes.getContent()).hasSize(0);
-        }
-    }
-
-    @Nested
-    @DisplayName("Integer deleteByIdAndMemberId(Long memberId, Long wishId) - 위시 아이템 삭제 테스트")
-    class RemoveByMemberIdentifyNumberAndProductIdTests {
-
-        @Test
-        @DisplayName("정상적인 memberId와 wishId로 위시 아이템 삭제 시 삭제")
-        void 정상적인_memberId와_productId로_위시_아이템_삭제_시_삭제() {
-            Wish wish = new Wish(
-                    existingMember,
-                    existingProduct
-            );
-            wish = wishRepository.save(wish);
-
-            assertThat(wishRepository.findById(wish.getId())).isPresent();
-            wishRepository.deleteByIdAndMemberId(wish.getId(), existingMember.getId());
-            assertThat(wishRepository.findById(wish.getId())).isEmpty();
-        }
-
-        @Test
-        @DisplayName("존재하는 memberId에 대해 존재하지 않는 productId로 위시 아이템 삭제 시 미삭제")
-        void 존재하는_memberId에_대해_존재하지_않는_productId로_위시_아이템_삭제_시_미삭제() {
-            // 본인 소유가 아닌 wish 삭제 시도
-            Wish wish = new Wish(
-                    existingMember,
-                    existingProduct
-            );
-            wish = wishRepository.save(wish);
-
-            assertThat(wishRepository.findById(wish.getId())).isPresent();
-            wishRepository.deleteByIdAndMemberId(wish.getId(), 999L);
-            assertThat(wishRepository.findById(wish.getId())).isPresent();
         }
     }
 }

@@ -5,12 +5,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
+import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenProvider {
@@ -19,8 +18,8 @@ public class JwtTokenProvider {
     private final long validityInMilliseconds;
 
     public JwtTokenProvider(
-        @Value("${jwt.secret-key}") String secret,
-        @Value("${jwt.expire-length}") long validityInMilliseconds
+            @Value("${jwt.secret-key}") String secret,
+            @Value("${jwt.expire-length-ms}") long validityInMilliseconds
     ) {
         this.validityInMilliseconds = validityInMilliseconds;
         byte[] keyBytes = Decoders.BASE64.decode(secret);
@@ -32,7 +31,8 @@ public class JwtTokenProvider {
         Date expiry = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
-                .subject(member.getEmail())
+                .subject(member.getId().toString())
+                .claim("email", member.getEmail())
                 .claim("role", member.getRole().name())
                 .issuedAt(now)
                 .expiration(expiry)
@@ -40,8 +40,13 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getUsername(String token) {
-        return extractAllClaims(token).getSubject();
+    public Long getId(String token) {
+        String subject = extractAllClaims(token).getSubject();
+        return subject != null ? Long.valueOf(subject) : null;
+    }
+
+    public String getEmail(String token) {
+        return extractAllClaims(token).get("email", String.class);
     }
 
     public String getRole(String token) {
@@ -59,9 +64,9 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
-                .verifyWith((SecretKey) secretKey)
-                .build()
-                .parseSignedClaims(token);
+                    .verifyWith((SecretKey) secretKey)
+                    .build()
+                    .parseSignedClaims(token);
             return true;
         } catch (Exception e) {
             return false;

@@ -1,10 +1,13 @@
 package gift.filter;
 
 import gift.entity.Role;
-import jakarta.servlet.*;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -12,7 +15,8 @@ import java.util.Arrays;
 public class AuthorizationFilter implements Filter {
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
@@ -29,6 +33,10 @@ public class AuthorizationFilter implements Filter {
     }
 
     private boolean isAuthorized(String uri, String method, String role) {
+        // /api/products/{id}/options : method에 따라 제한 role 존재
+        if (uri.startsWith("/api/products/") && uri.contains("options")) {
+            return checkApiProductsOptionsAuthorization(method, role);
+        }
         // /api/products : method에 따라 제한 role 존재
         if (uri.startsWith("/api/products")) {
             return checkApiProductsAuthorization(method, role);
@@ -54,6 +62,15 @@ public class AuthorizationFilter implements Filter {
             return checkAdminMembersAuthorization(method, role);
         }
         return true; // Authorize by default for public endpoints (ex. /api/members : for register & login)
+    }
+
+    private boolean checkApiProductsOptionsAuthorization(String method, String role) {
+        switch (method) {
+            case "POST", "PATCH", "DELETE":
+                return hasAnyRole(role, Role.ROLE_MD);
+            default:
+                return true;
+        }
     }
 
     private boolean checkApiProductsAuthorization(String method, String role) {
@@ -99,7 +116,7 @@ public class AuthorizationFilter implements Filter {
 
     private boolean hasAnyRole(String userRole, Role... requiredRoles) {
         return isAuthenticated(userRole)
-            && Arrays.stream(requiredRoles).anyMatch(r -> userRole.equals(r.name()));
+                && Arrays.stream(requiredRoles).anyMatch(r -> userRole.equals(r.name()));
     }
 
     private void sendError(HttpServletResponse httpResponse, String role) throws IOException {

@@ -1,21 +1,24 @@
 package gift.dto;
 
-import gift.entity.Product;
+import java.util.List;
 
 public record ProductResponse(
         Long id,
         String name,
         Integer price,
         String imageUrl,
+        List<ProductOptionResponse> productOptions,
         Boolean validated
 ) {
-    public static ProductResponse from(Product product) {
+
+    public static ProductResponse from(ProductDto productDto) {
         return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getPrice(),
-                product.getImageUrl(),
-                product.isValidated()
+                productDto.id(),
+                productDto.name(),
+                productDto.price(),
+                productDto.imageUrl(),
+                productDto.options().stream().map(ProductOptionResponse::from).toList(),
+                productDto.validated()
         );
     }
 }
